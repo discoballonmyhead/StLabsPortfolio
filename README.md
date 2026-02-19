@@ -1,53 +1,37 @@
-# STLABSPORTFOLIO
+# Studio Name
 
-Minimal dark STLABSPORTFOLIO built with Vite + React + React Router.
+Building creative, mobile and interactive experiences across platforms, also gaming and other fun stuff. Yes, AI is cool, I would rather focus on its math rather than its craze.
 
-## Before deploying — update these
+---
 
-| File | What to change |
-|------|----------------|
-| `src/components/Nav.jsx` | Replace `Stateless Labs` with your org name |
-| `src/pages/Home.jsx` | Update headline, bio, and About section |
-| `src/pages/projects/calculator/CalculatorApp.jsx` | Add real Play Store / App Store links |
-| `src/pages/projects/calculator/PrivacyPolicy.jsx` | Replace `your@email.com` |
-| `public/CNAME` | Replace `yourdomain.com` with your domain |
-| `index.html` | Update `<title>` |
+## Stack
 
-## Local development
+![Flutter](https://img.shields.io/badge/Flutter-02569B?style=flat-square&logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-0175C2?style=flat-square&logo=dart&logoColor=white)
+![React](https://img.shields.io/badge/React-20232a?style=flat-square&logo=react&logoColor=61DAFB)
+![Phaser](https://img.shields.io/badge/Phaser-7B42BC?style=flat-square&logo=phaser&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![Android](https://img.shields.io/badge/Android-3DDC84?style=flat-square&logo=android&logoColor=white)
+![Java](https://img.shields.io/badge/Java-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
+![iOS](https://img.shields.io/badge/iOS-000000?style=flat-square&logo=apple&logoColor=white)
+![Xcode](https://img.shields.io/badge/Xcode-1575F9?style=flat-square&logo=xcode&logoColor=white)
+![Unity](https://img.shields.io/badge/Unity-100000?style=flat-square&logo=unity&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-239120?style=flat-square&logo=csharp&logoColor=white)
+![Unreal Engine](https://img.shields.io/badge/Unreal-313131?style=flat-square&logo=unrealengine&logoColor=white)
+![C++](https://img.shields.io/badge/C++-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 
-```bash
-npm install
-npm run dev    # http://localhost:5173
-```
+---
 
-## Deploy to GitHub Pages
+## Projects
 
-### 1. Push to GitHub
-```bash
-git init
-git add .
-git commit -m "init"
-git remote add origin https://github.com/USERNAME/REPO.git
-git push -u origin main
-```
+| App | Platform | Status |
+|-----|----------|--------|
+| — | — | — |
 
-### 2. Enable Pages
-Repo → Settings → Pages → Source → **GitHub Actions**
+---
 
-The workflow auto-deploys on every push to `main`.
+## Contact
 
-### 3. DNS records (in your registrar)
-```
-A  @  185.199.108.153
-A  @  185.199.109.153
-A  @  185.199.110.153
-A  @  185.199.111.153
-```
-Then Settings → Pages → Enforce HTTPS.
+&nbsp;
 
-## Adding another app
-
-1. Add entry to `projects` array in `src/pages/Projects.jsx`
-2. Create `src/pages/projects/APPNAME/AppName.jsx`
-3. Create `src/pages/projects/APPNAME/PrivacyPolicy.jsx`
-4. Add routes in `src/App.jsx`
+> Apps built to last.
