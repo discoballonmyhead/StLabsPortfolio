@@ -21,17 +21,3 @@ Building creative, mobile and interactive experiences across platforms, also gam
 ![C++](https://img.shields.io/badge/C++-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 
 ---
-
-## Projects
-
-| App | Platform | Status |
-|-----|----------|--------|
-| — | — | — |
-
----
-
-## Contact
-
-&nbsp;
-
-> Apps built to last.
