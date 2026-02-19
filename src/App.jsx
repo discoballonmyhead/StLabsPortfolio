@@ -13,9 +13,9 @@ import AuthSuccess from './pages/projects/projectkin/AuthSuccess'
 import AuthFailed from './pages/projects/projectkin/AuthFailed'
 
 // Project Vault App
-import EmailApp from './pages/projects/emailapp/EmailApp'
-import EmailPrivacy from './pages/projects/emailapp/PrivacyPolicy'
-import EmailSent from './pages/projects/emailapp/EmailSent'
+import EmailApp from './pages/projects/proejctvault/EmailApp'
+import EmailPrivacy from './pages/projects/proejctvault/PrivacyPolicy'
+import EmailSent from './pages/projects/proejctvault/EmailSent'
 
 import NotFound from './pages/NotFound'
 
@@ -34,9 +34,9 @@ export default function App() {
       <Route path="/projects/projectkin/auth/success" element={<AuthSuccess />} />
       <Route path="/projects/projectkin/auth/failed" element={<AuthFailed />} />
 
-      <Route path="/projects/emailapp" element={<EmailApp />} />
-      <Route path="/projects/emailapp/privacy-policy" element={<EmailPrivacy />} />
-      <Route path="/projects/emailapp/email-sent" element={<EmailSent />} />
+      <Route path="/projects/proejctvault" element={<EmailApp />} />
+      <Route path="/projects/proejctvault/privacy-policy" element={<EmailPrivacy />} />
+      <Route path="/projects/proejctvault/email-sent" element={<EmailSent />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>
