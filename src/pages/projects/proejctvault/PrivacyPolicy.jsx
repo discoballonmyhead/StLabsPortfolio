@@ -1,6 +1,6 @@
 import { PrivacyLayout } from '../shared'
 
-export default function EmailPrivacy() {
+export default function ProjectVaultPrivacy() {
   return (
     <PrivacyLayout
       appName="Email App"

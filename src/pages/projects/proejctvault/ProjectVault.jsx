@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import Layout from '../../../components/Layout'
 import { appStyles as s, Breadcrumb, AppHeader, Divider, SectionLabel } from '../shared'
 
-export default function EmailApp() {
+export default function ProjectVault() {
   return (
     <Layout>
       <div style={s.page}>
@@ -64,7 +64,7 @@ export default function EmailApp() {
           <section>
             <SectionLabel>Legal</SectionLabel>
             <p style={s.bodyText}>Email credentials are stored securely on-device only and never transmitted to any external server operated by this studio.</p>
-            <Link to="/projects/emailapp/privacy-policy" style={s.policyLink}
+            <Link to="/projects/ProjectVault/privacy-policy" style={s.policyLink}
               onMouseEnter={e => { e.currentTarget.style.color = '#f0f0f0'; e.currentTarget.style.borderColor = '#555' }}
               onMouseLeave={e => { e.currentTarget.style.color = '#777'; e.currentTarget.style.borderColor = '#2a2a2a' }}>
               Privacy Policy

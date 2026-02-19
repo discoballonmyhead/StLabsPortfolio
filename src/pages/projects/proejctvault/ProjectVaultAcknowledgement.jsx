@@ -134,7 +134,7 @@ const s = {
   },
 }
 
-export default function EmailSent() {
+export default function ProjectVaultAcknowledgement() {
   const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   const date = new Date().toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
 
@@ -183,13 +183,13 @@ export default function EmailSent() {
 
         <div style={s.actions}>
           <a href="#" style={s.btnDone}
-            onMouseEnter={e=>e.currentTarget.style.opacity='0.85'}
-            onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
             Go to Inbox
           </a>
           <Link to="/projects/emailapp" style={s.btnBack}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor='#332e4a';e.currentTarget.style.color='#7c6fcd'}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor='#1a1828';e.currentTarget.style.color='#332e4a'}}>
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#332e4a'; e.currentTarget.style.color = '#7c6fcd' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = '#1a1828'; e.currentTarget.style.color = '#332e4a' }}>
             Back
           </Link>
         </div>

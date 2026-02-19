@@ -8,14 +8,44 @@ import CalculatorPrivacy from './pages/projects/calculator/PrivacyPolicy'
 
 // Project Kin App
 import ProjectKin from './pages/projects/projectkin/ProjectKin'
-import AuthPrivacy from './pages/projects/projectkin/PrivacyPolicy'
-import AuthSuccess from './pages/projects/projectkin/AuthSuccess'
-import AuthFailed from './pages/projects/projectkin/AuthFailed'
+import ProjectKinPrivacy from './pages/projects/projectkin/PrivacyPolicy'
+import ProjectKinAuthSuccess from './pages/projects/projectkin/ProjectKinAuthSuccess'
+import ProjectKinAuthFailed from './pages/projects/projectkin/ProjectKinAuthFailed'
 
 // Project Vault App
-import EmailApp from './pages/projects/proejctvault/EmailApp'
-import EmailPrivacy from './pages/projects/proejctvault/PrivacyPolicy'
-import EmailSent from './pages/projects/proejctvault/EmailSent'
+import ProjectVault from './pages/projects/proejctvault/ProjectVault'
+import ProjectVaultPrivacy from './pages/projects/proejctvault/PrivacyPolicy'
+import ProjectVaultAcknowledgement from './pages/projects/proejctvault/ProjectVaultAcknowledgement'
+
+
+{/*// Project phaser learning App
+import ProjectVault from './pages/projects/proejctvault/ProjectVault'
+import ProjectVaultPrivacy from './pages/projects/proejctvault/PrivacyPolicy'
+import ProjectVaultAcknowledgement from './pages/projects/proejctvault/ProjectVaultAcknowledgement'
+
+*/}
+{/*// Project runner learning App
+import ProjectVault from './pages/projects/proejctvault/ProjectVault'
+import ProjectVaultPrivacy from './pages/projects/proejctvault/PrivacyPolicy'
+import ProjectVaultAcknowledgement from './pages/projects/proejctvault/ProjectVaultAcknowledgement'
+
+*/}
+
+
+
+{/*// Project pray learning App
+import ProjectVault from './pages/projects/proejctvault/ProjectVault'
+import ProjectVaultPrivacy from './pages/projects/proejctvault/PrivacyPolicy'
+import ProjectVaultAcknowledgement from './pages/projects/proejctvault/ProjectVaultAcknowledgement'
+
+*/}
+
+{/*// Project chess royale learning App
+import ProjectVault from './pages/projects/proejctvault/ProjectVault'
+import ProjectVaultPrivacy from './pages/projects/proejctvault/PrivacyPolicy'
+import ProjectVaultAcknowledgement from './pages/projects/proejctvault/ProjectVaultAcknowledgement'
+
+*/}
 
 import NotFound from './pages/NotFound'
 
@@ -30,13 +60,13 @@ export default function App() {
       <Route path="/projects/calculator/privacy-policy" element={<CalculatorPrivacy />} />
 
       <Route path="/projects/projectkin" element={<ProjectKin />} />
-      <Route path="/projects/projectkin/privacy-policy" element={<AuthPrivacy />} />
-      <Route path="/projects/projectkin/auth/success" element={<AuthSuccess />} />
-      <Route path="/projects/projectkin/auth/failed" element={<AuthFailed />} />
+      <Route path="/projects/projectkin/privacy-policy" element={<ProjectKinPrivacy />} />
+      <Route path="/projects/projectkin/auth/success" element={<ProjectKinAuthSuccess />} />
+      <Route path="/projects/projectkin/auth/failed" element={<ProjectKinAuthFailed />} />
 
-      <Route path="/projects/proejctvault" element={<EmailApp />} />
-      <Route path="/projects/proejctvault/privacy-policy" element={<EmailPrivacy />} />
-      <Route path="/projects/proejctvault/email-sent" element={<EmailSent />} />
+      <Route path="/projects/proejctvault" element={<ProjectVault />} />
+      <Route path="/projects/proejctvault/privacy-policy" element={<ProjectVaultPrivacy />} />
+      <Route path="/projects/proejctvault/email-sent" element={<ProjectVaultAcknowledgement />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

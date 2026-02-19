@@ -1,6 +1,6 @@
 import { PrivacyLayout } from '../shared'
 
-export default function AuthPrivacy() {
+export default function ProjectKinPrivacy() {
   return (
     <PrivacyLayout
       appName="Auth App"
