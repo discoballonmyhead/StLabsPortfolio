@@ -1,0 +1,12 @@
+:root {
+    --rotation-speed-left: 2s;
+    /* Speed of continuous leftward rotation */
+    --rotation-speed-right: 0.3s;
+    /* Speed of rightward burst rotation */
+    --right-rotation-interval: 20%;
+    /* The percentage in keyframes when the right rotation happens */
+}
+
+body {
+    color: white;
+}
