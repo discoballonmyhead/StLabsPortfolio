@@ -3,7 +3,7 @@ import Layout from '../components/Layout'
 
 const projects = [
   {
-    slug: 'calculator',
+    slug: 'project-funny-calculator',
     name: 'Calculator',
     tagline: 'A clean, minimal calculator for Android and iOS.',
     platform: 'Android',
@@ -12,7 +12,7 @@ const projects = [
     tech: ['Flutter', 'Dart'],
   },
   {
-    slug: 'projectkin',
+    slug: 'project-kin',
     name: 'Project Kin',
     tagline: 'Social media application to reforge your attention span',
     platform: 'Android · iOS',
@@ -21,7 +21,7 @@ const projects = [
     tech: ['Flutter', 'Dart', 'Supabase'],
   },
   {
-    slug: 'projectvault',
+    slug: 'project-vault',
     name: 'Project Vault',
     tagline: 'Cryptography (Not Crypto) related app',
     platform: 'Android · iOS',
@@ -37,6 +37,15 @@ const projects = [
     status: 'In Development',
     year: '2026',
     tech: ['Phaser', 'JavaScript', 'Tiled'],
+  },
+  {
+    slug: 'project-blinko-admin',
+    name: 'Blinko Admin',
+    tagline: 'Admin App for Blinko Analytics',
+    platform: 'Android · iOS',
+    status: 'Live',
+    year: '2026',
+    tech: ['Flutter', 'Dart'],
   },
 ]
 

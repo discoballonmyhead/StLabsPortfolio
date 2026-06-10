@@ -133,7 +133,7 @@ const s = {
     letterSpacing: '0.06em',
   },
 }
-
+//it is  for one time messages only
 export default function ProjectVaultAcknowledgement() {
   const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   const date = new Date().toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })

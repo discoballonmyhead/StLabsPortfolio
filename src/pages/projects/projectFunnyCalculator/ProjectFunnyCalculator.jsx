@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import Layout from '../../../components/Layout'
 import { appStyles as s, Breadcrumb, AppHeader, Divider, SectionLabel } from '../shared'
 
-export default function CalculatorApp() {
+export default function ProjectFunnyCalculator() {
   return (
     <Layout>
       <div style={s.page}>
