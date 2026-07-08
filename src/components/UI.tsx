@@ -145,12 +145,14 @@ import { Link } from 'react-router-dom'
 interface PolicyLinkProps {
   to: string
   children: ReactNode
+  style?: React.CSSProperties
 }
-export function PolicyLink({ to, children }: PolicyLinkProps) {
+export function PolicyLink({ to, children, style: extraStyle }: PolicyLinkProps) {
   return (
     <Link
       to={to}
       style={{
+        ...extraStyle,
         display: 'inline-block',
         marginTop: '14px',
         fontSize: '13px',

@@ -1,19 +1,35 @@
+/**
+ * particles.config.ts
+ *
+ * Configuration for all ParticleViewer instances.
+ * This file is pure config data — no Strudel imports, no React, no canvas.
+ *
+ * Strudel is a separate system in src/strudel/ and must never be imported here.
+ * To switch the home page hero to a Strudel visualizer instead of particles:
+ *   1. Set flags.showParticleBackground = false in site.config.ts
+ *   2. Render your <StrudelVisualizer /> component in Home.tsx in its slot
+ *   That is all. Do not touch this file for that.
+ */
+
 import type { ShapeName } from './shapes'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface SectionParticleConfig {
   sectionId: string
   shapes: ShapeName[]
-  colors: string[]   // one color per shape, cycles with each morph
+  colors: string[]   // one colour per shape, cycles with each morph
   colorFar?: string
   particleCount?: number
   particleSize?: number
-  morphHold?: number
-  morphDuration?: number
+  morphHold?: number     // seconds to hold each shape before morphing
+  morphDuration?: number     // seconds the morph transition takes
   autoRotateSpeed?: number
 }
 
-// Cosmic palette: orange, green, white cycling with each shape
-// Cosmic palette: 17 colors for 17 shapes
+// ── Cosmic palette — 17 colours for 17 shapes ─────────────────────────────────
+// orange, green, white cycling with each shape
+
 export const COSMIC_COLORS = [
   '#FF6B2B',   // cosmic orange
   '#00FFB2',   // cosmic green
@@ -31,10 +47,13 @@ export const COSMIC_COLORS = [
   '#39FF14',   // neon green
   '#FAFAFA',   // white
   '#FF7A00',   // orange
-  '#B2FF4D',   // **NEW**: electric lime/green
+  '#B2FF4D',   // electric lime/green
 ]
 
-// All 16 shapes cycling, each gets its own cosmic color
+// ── Hero config — home page ───────────────────────────────────────────────────
+// All 17 shapes cycling, each gets its own cosmic colour.
+// particleCount reduced on mobile inside Home.tsx before being passed in.
+
 export const heroParticleConfig: SectionParticleConfig = {
   sectionId: 'hero',
   shapes: [
@@ -60,10 +79,12 @@ export const heroParticleConfig: SectionParticleConfig = {
   colorFar: '#050810',
   particleCount: 3500,
   particleSize: 1.5,
-  morphHold: 1.0,
+  morphHold: 4.5,
   morphDuration: 0.8,
   autoRotateSpeed: 0.008,
 }
+
+// ── Section configs — other page sections ─────────────────────────────────────
 
 export const sectionParticles: SectionParticleConfig[] = [
   {

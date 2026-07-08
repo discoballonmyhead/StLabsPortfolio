@@ -9,24 +9,27 @@
 
 export const assets = {
   // Brand logos
-  logoAnimated: '/logos/stlabs-logo-animated.svg',   // animated brand logo (nav / about)
-  logoStatic: '/logos/stlabs-logo.svg',            // static fallback
+  logoAnimated: '/logos/light.svg',   // animated brand logo (nav / about)
+  logoStatic: '/logos/stlabslogo.svg',            // static fallback
   logoMark: '/logos/stlabs-mark.svg',            // icon-only mark
 
   // Resolve / loading screen
-  resolveGif: '/logos/stlabs-logo-animated.svg',   // animated SVG logo
+  resolveGif: '/logos/light.svg',   // animated SVG logo
 
   // Tech / partner logos (custom, not shields.io)
-  phaserLogo: '/logos/phaser-planet-web.png',
+  phaserLogo: '/logos/phaser.png',
   csharpLogo: '/logos/csharp.png',
 
   // Project app icons  (shown on status/confirmation pages)
   // Add per-project icons here as you create them
+
+  defaultCover: '/defaults/cover.png',   // recommended: 1280x720px, 16:9
+  defaultIcon: '/defaults/icon.png',
   icons: {
-    blinkoAdmin: '/icons/blinko-admin.png',
+    projectBlinkoAdmin: '/icons/blinko-admin.png',
     projectVault: '/icons/project-vault.png',
     projectKin: '/icons/project-kin.png',
-    calculator: '/icons/calculator.png',
+    projectFunnyCalculator: '/icons/projectFunnyCalculator.png',
   },
 } as const
 
@@ -40,7 +43,7 @@ export const brand = {
   tagline: 'Execution on Creative Ideas',
   description: 'A small studio focused on clean, creative, innovative applications.',
   email: 'info@stateless-labs.com',
-  privacyEmail: 'privacy@stateless-labs.com',
+  privacyEmail: 'info@stateless-labs.com',
   url: 'https://stateless-labs.com',
 } as const
 
@@ -72,18 +75,25 @@ export const musicConfig = {
 
 export const leadership = Object.assign(
   [
-    // Example — replace with real people:
+    // ── Add your team members here ──────────────────────────────────────────
+    // Drop photos in /public/team/ and fill in the fields below.
+    // For easter eggs: set alterEnabled: true + alterImage + alterGithub.
+    //
     // {
-    //   name:    'Jane Smith',
-    //   role:    'Founder',
-    //   title:   'Founder & CEO',
-    //   bio:     'Building tools for developers.',
-    //   image:   '/team/jane.jpg',
-    //   linkedin:'https://linkedin.com/in/jane',
-    //   accent:  '#00FFB2',
-    //   alterEnabled: true,
-    //   alterImage:   '/team/jane-alt.jpg',
-    //   alterGithub:  'https://github.com/jane',
+    //   name:          'Your Name',
+    //   role:          'Founder',
+    //   title:         'Founder & CEO',
+    //   bio:           'Short bio here.',
+    //   image:         '/team/you.jpg',
+    //   linkedin:      'https://linkedin.com/in/yourhandle',
+    //   accent:        '#00FFB2',
+    //   region:        'London',
+    //   alterEnabled:  true,
+    //   alterImage:    '/team/you-alt.jpg',
+    //   alterName:     'Alt Name',
+    //   alterTitle:    'Alt Title',
+    //   alterBio:      'Alt bio.',
+    //   alterGithub:   'https://github.com/yourhandle',
     // },
   ],
   {
@@ -102,6 +112,19 @@ export const leadership = Object.assign(
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// ACCOUNT DELETION CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. Create a Google Apps Script web app using deletion-script.gs
+// 2. Deploy it (Execute as: Me, Who has access: Anyone)
+// 3. Paste the deployed URL below
+
+export const deletionConfig = {
+  // Paste your Apps Script web app URL here after deploying:
+  scriptUrl: 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec',
+} as const
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -109,6 +132,7 @@ export const nav = {
   links: [
     { label: 'Home', path: '/' },
     { label: 'Projects', path: '/projects' },
+    { label: 'Team', path: '/team' },
   ],
 } as const
 
@@ -118,11 +142,24 @@ export const nav = {
 
 export const homePage = {
   eyebrow: 'Creative Coding · Games · Internal Tooling · Fun Stuff',
-  headline: 'Executing \nCreative Ideas',
+  headline: 'Execution on\nCreative Ideas',
   subtext: 'A small studio focused on clean, creative, innovative applications. Every project tracked here.',
   ctaLabel: 'View projects',
   ctaPath: '/projects',
   about: 'Stateless Labs is primarily a Creative Coding studio. The focus is on innovative ideas that solve problems — we emphasize market viability and market strength after an idea has been properly realised. Stateless Labs also provides Cybersecurity Tooling, Management, and Maintenance Services.',
+} as const
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROJECTS PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const projectsPage = {
+  eyebrow: 'Stateless Labs',
+  heading: 'Projects',
+  subtext: 'Every app we have built, from live products to archived experiments.',
+  activeSectionLabel: 'Active',
+  inactiveSectionLabel: 'No longer active',
+  inactiveNote: 'These apps are no longer maintained. Links and downloads are disabled.',
 } as const
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -194,8 +231,28 @@ export const homeStackBadges: string[] = [
 // PROJECT STATUS
 // ─────────────────────────────────────────────────────────────────────────────
 
+
 export type ProjectStatus =
-  | 'Live' | 'In Development' | 'Beta' | 'Paused' | 'Dead' | 'Archived'
+  | 'Live'
+  | 'Beta'
+  | 'In Development'
+  | 'Paused'
+  | 'Dead'
+  | 'Archived'
+  | 'Defunct'
+  | 'Abandoned'
+  | 'Discontinued'
+
+// 2. ADD this new type after ProjectStatus:
+
+export type ProjectVisibility =
+  | 'Public'            // default - no badge, store links shown normally
+  | 'Internal'          // built for internal org, hides public store links
+  | 'Internal Testing'  // active internal QA, hides store links
+  | 'Private Beta'      // invite-only, still shows the detail page
+  | 'Restricted'        // access requires approval, hides store links
+  | 'Unlisted'          // exists but not promoted
+
 
 export type Platform = 'Mobile' | 'Web' | 'Desktop' | 'Cross-platform' | 'Internal'
 
@@ -211,6 +268,7 @@ export interface PermissionEntry {
 export interface PrivacyConfig {
   updated: string
   contact: string
+  visibility?: ProjectVisibility
   collectsData: boolean
   summaryOverride?: string
   androidPermission?: boolean
@@ -254,6 +312,14 @@ export interface ProjectConfig {
   // coverImage shown as hero thumbnail, screenshots[] opened in carousel
   coverImage?: string
   screenshots?: string[]      // empty or omitted = no carousel shown
+
+  classified?: boolean   // renders as a redacted card, opens a meme on click
+  memeGif?: string
+  // Account deletion — enables /projects/<slug>/delete-account route
+  deletion?: {
+    identifierLabel?: string   // default: 'Email address or username'
+    extraNote?: string   // shown below the identifier field
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -270,7 +336,7 @@ export const projects: ProjectConfig[] = [
     status: 'In Development',
     tech: ['Flutter', 'Dart', 'Supabase'],
     label: 'Mobile App · 2025',
-    appIconPath: assets.icons.blinkoAdmin,
+    appIconPath: assets.icons.projectBlinkoAdmin,
 
     about: [
       'Blinko Analytics is an internal admin application built for the Blinko Analytics company. It gives every team member a digital business card they can present at events, and gives content roles the ability to publish company posts — all from a single Flutter codebase targeting Android, iOS, macOS, Windows, Linux, and web.',
@@ -395,7 +461,7 @@ export const projects: ProjectConfig[] = [
     status: 'Live',
     tech: ['Flutter', 'Dart', 'Android', 'iOS'],
     label: 'Mobile App · 2024',
-    appIconPath: assets.icons.calculator,
+    appIconPath: assets.icons.projectFunnyCalculator,
 
     about: [
       'A fast, minimal calculator built with Flutter using BLoC state management and Clean Architecture. Supports standard arithmetic, percentages, decimal numbers, and real-time expression preview. No ads, no tracking.',

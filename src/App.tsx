@@ -13,6 +13,7 @@ import NotFound from '@/pages/not-found/NotFound'
 // Lazy-loaded feature pages (code-split)
 const ProjectDetail = lazy(() => import('@/features/projects/ProjectDetail'))
 const PrivacyPage = lazy(() => import('@/features/privacy/PrivacyPage'))
+const DeleteAccountPage = lazy(() => import('@/features/delete-account/DeleteAccountPage'))
 const StatusPage = lazy(() => import('@/features/status-pages/StatusPage'))
 
 function buildProjectRoutes() {
@@ -21,6 +22,7 @@ function buildProjectRoutes() {
     const routes = [
       { path: base, element: <ProjectDetail slug={p.slug} /> },
       { path: `${base}/privacy-policy`, element: <PrivacyPage slug={p.slug} /> },
+      { path: `${base}/delete-account`, element: <DeleteAccountPage slug={p.slug} /> },
     ]
     if (p.hasAuthPages) {
       routes.push(

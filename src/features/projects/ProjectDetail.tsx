@@ -135,6 +135,9 @@ export default function ProjectDetail({ slug }: Props) {
             <SectionLabel>Legal</SectionLabel>
             {p.legalNote && <p style={bodyText}>{p.legalNote}</p>}
             <PolicyLink to={`${basePath}/privacy-policy`}>Privacy Policy</PolicyLink>
+            <PolicyLink to={`${basePath}/delete-account`} style={{ marginTop: '8px', display: 'block' }}>
+              Delete Account &amp; Data
+            </PolicyLink>
           </section>
         </div>
       </div>
