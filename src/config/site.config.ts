@@ -41,7 +41,7 @@ export const brand = {
   name: 'Stateless Labs',
   shortName: 'STLABS',
   tagline: 'Execution on Creative Ideas',
-  description: 'A small studio focused on clean, creative, innovative applications.',
+  description: 'A small studio that takes curious ideas seriously and builds them properly. Games, tools, experiments, and the occasional thing that surprises even us.',
   email: 'info@stateless-labs.com',
   privacyEmail: 'info@stateless-labs.com',
   url: 'https://stateless-labs.com',
@@ -132,7 +132,7 @@ export const nav = {
   links: [
     { label: 'Home', path: '/' },
     { label: 'Projects', path: '/projects' },
-    { label: 'Team', path: '/team' },
+    ...(leadership.length > 0 ? [{ label: 'Team', path: '/team' }] : []),
   ],
 } as const
 
@@ -143,11 +143,11 @@ export const nav = {
 export const homePage = {
   eyebrow: 'Creative Coding · Games · Internal Tooling · Fun Stuff',
   headline: 'Execution on\nCreative Ideas',
-  subtext: 'A small studio focused on clean, creative, innovative applications. Every project tracked here.',
+  subtext: 'We are a small studio with a simple habit: when an idea makes us grin, we build it. Every project we have ever shipped lives on this site, the hits and the misfires alike.',
   ctaLabel: 'View projects',
   ctaPath: '/projects',
-  about: 'Stateless Labs is primarily a Creative Coding studio. The focus is on innovative ideas that solve problems — we emphasize market viability and market strength after an idea has been properly realised. Stateless Labs also provides Cybersecurity Tooling, Management, and Maintenance Services.',
-} as const
+  about: 'Stateless Labs is a creative coding studio at heart. We chase the ideas that make us say "wait, that could actually work", prototype them fast, and keep polishing until they feel inevitable. Once something proves itself, we get serious about making it viable and strong in the real world. On the quieter side of the shop, we also build and maintain cybersecurity tooling, because things people trust matter as much as things people love.',
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PROJECTS PAGE
@@ -156,11 +156,11 @@ export const homePage = {
 export const projectsPage = {
   eyebrow: 'Stateless Labs',
   heading: 'Projects',
-  subtext: 'Every app we have built, from live products to archived experiments.',
+  subtext: 'The full record of everything we have built, from live products to experiments we retired. No highlight reel, just the work.',
   activeSectionLabel: 'Active',
   inactiveSectionLabel: 'No longer active',
-  inactiveNote: 'These apps are no longer maintained. Links and downloads are disabled.',
-} as const
+  inactiveNote: 'These apps had their run and taught us plenty. Links and downloads are disabled, but we keep them here on principle.',
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BACKGROUND LOGO CONFIG

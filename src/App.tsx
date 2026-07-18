@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { useRoutes } from 'react-router-dom'
-import { projects } from '@/config'
+import { leadership, projects } from '@/config'
 import { Resolve } from '@/components'
 import MusicPlayer from '@/components/MusicPlayer'
 
@@ -45,7 +45,7 @@ function Routes() {
   return useRoutes([
     { path: '/', element: <Home /> },
     { path: '/projects', element: <ProjectsPage /> },
-    { path: '/team', element: <TeamPage /> },
+    ...(leadership.length > 0 ? [{ path: '/team', element: <TeamPage /> }] : []),
     ...buildProjectRoutes(),
     { path: '*', element: <NotFound /> },
   ])

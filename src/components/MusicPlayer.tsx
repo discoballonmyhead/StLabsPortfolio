@@ -3,7 +3,10 @@
  *
  * Mounted ONCE in App.tsx above the router — never remounts on navigation.
  * Audio persists across all route changes. Fade behaviour, panel UI, and the
- * 'mp:state' / 'mp:crescendo' event contracts are unchanged.
+ * 'mp:state' / 'mp:crescendo' event contracts are unchanged. The <audio>
+ * element also carries id="mp-audio" so other components (e.g. ParticleViewer)
+ * can read the real playback position directly via document.getElementById,
+ * instead of relying only on the play/pause events.
  *
  * VISUALIZER v3:
  *
@@ -714,7 +717,7 @@ export default function MusicPlayer() {
 
     return (
         <>
-            <audio ref={audioRef} src={musicConfig.src} autoPlay loop preload="auto"
+            <audio ref={audioRef} id="mp-audio" src={musicConfig.src} autoPlay loop preload="auto"
                 onPlay={() => {
                     setPlaying(true)
                     setStarted(true)

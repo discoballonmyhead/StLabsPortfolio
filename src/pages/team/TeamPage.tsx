@@ -173,8 +173,8 @@ function MobileCard({ person, isGlitched }: { person: TeamMember; isGlitched: bo
             </div>
             <div style={{ padding: '12px 13px 15px', display: 'flex', flexDirection: 'column', gap: 3, flex: 1 }}>
                 <span style={{ color: a, fontSize: 9, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{person.role}</span>
-                <h3 style={{ fontWeight: 800, fontSize: '0.90rem', color: '#f2f2f2', margin: 0, lineHeight: 1.2 }}>{name}</h3>
-                {title && <p style={{ color: 'rgba(255,255,255,0.40)', fontSize: 10, margin: 0, lineHeight: 1.4 }}>{title}</p>}
+                <h3 style={{ fontWeight: 800, fontSize: '0.90rem', color: 'var(--text)', margin: 0, lineHeight: 1.2 }}>{name}</h3>
+                {title && <p style={{ color: 'var(--text-dim)', fontSize: 10, margin: 0, lineHeight: 1.4 }}>{title}</p>}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 9, gap: 6, flexWrap: 'wrap' }}>
                     <RegionBadge person={person} accent={a} />
                     {linked && <a href={linked} target="_blank" rel="noopener noreferrer"
@@ -218,9 +218,9 @@ function DesktopCard({ person, isGlitched }: { person: TeamMember; isGlitched: b
                     <span style={{ color: a, fontSize: 10, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{person.role}</span>
                     <RegionBadge person={person} accent={a} />
                 </div>
-                <h3 style={{ fontWeight: 800, fontSize: '1.85rem', color: '#f2f2f2', margin: '0 0 4px', lineHeight: 1.1 }}>{name}</h3>
-                {title && <p style={{ color: 'rgba(255,255,255,0.40)', fontSize: 13, marginBottom: bio ? 16 : 20 }}>{title}</p>}
-                {bio && <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.92rem', lineHeight: 1.8, marginBottom: 24, flex: 1 }}>{bio}</p>}
+                <h3 style={{ fontWeight: 800, fontSize: '1.85rem', color: 'var(--text)', margin: '0 0 4px', lineHeight: 1.1 }}>{name}</h3>
+                {title && <p style={{ color: 'var(--text-dim)', fontSize: 13, marginBottom: bio ? 16 : 20 }}>{title}</p>}
+                {bio && <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', lineHeight: 1.8, marginBottom: 24, flex: 1 }}>{bio}</p>}
                 {linked && linkBtn(linked, a, <LI />, 'LinkedIn')}
                 {github && linkBtn(github, a, <GH />, 'GitHub')}
             </div>
@@ -262,9 +262,9 @@ function ChairCard({ person, onDismiss, isMobile }: { person: ChairPerson; onDis
                         ♛ {person.role}
                     </span>
                 </div>
-                <h2 style={{ fontWeight: 800, fontSize: isMobile ? '1.8rem' : '2.6rem', color: '#f2f2f2', margin: '0 0 6px', lineHeight: 1.05, letterSpacing: '-0.02em' }}>{person.name}</h2>
+                <h2 style={{ fontWeight: 800, fontSize: isMobile ? '1.8rem' : '2.6rem', color: 'var(--text)', margin: '0 0 6px', lineHeight: 1.05, letterSpacing: '-0.02em' }}>{person.name}</h2>
                 {person.title && <p style={{ color: `${a}99`, fontSize: isMobile ? 12 : 14, fontWeight: 600, marginBottom: 16 }}>{person.title}</p>}
-                {person.bio && <p style={{ color: 'rgba(255,255,255,0.60)', fontSize: isMobile ? '0.88rem' : '0.96rem', lineHeight: 1.85, marginBottom: 24, flex: 1 }}>{person.bio}</p>}
+                {person.bio && <p style={{ color: 'var(--text-muted)', fontSize: isMobile ? '0.88rem' : '0.96rem', lineHeight: 1.85, marginBottom: 24, flex: 1 }}>{person.bio}</p>}
                 {person.github && linkBtn(person.github, a, <GH />, 'GitHub')}
             </div>
         </div>
@@ -332,19 +332,19 @@ export default function TeamPage() {
         <Layout>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
                 <header style={{ paddingTop: '24px' }}>
-                    <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: '#555', marginBottom: '14px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '14px' }}>
                         Stateless Labs
                     </p>
-                    <h1 style={{ fontSize: 'clamp(36px,5vw,56px)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.05, color: '#f2f2f2', marginBottom: '16px' }}>
+                    <h1 style={{ fontSize: 'clamp(36px,5vw,56px)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.05, color: 'var(--text)', marginBottom: '16px' }}>
                         Leadership
                     </h1>
-                    <p style={{ fontSize: '15px', color: '#888', lineHeight: 1.7, maxWidth: '480px' }}>
+                    <p style={{ fontSize: '15px', color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: '480px' }}>
                         The people behind Stateless Labs.
                     </p>
                 </header>
 
                 <div style={{ position: 'relative', maxWidth: '320px' }}>
-                    <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#444', pointerEvents: 'none' }}
+                    <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-dim)', pointerEvents: 'none' }}
                         width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                     </svg>
@@ -352,14 +352,14 @@ export default function TeamPage() {
                         style={{
                             width: '100%', boxSizing: 'border-box', background: 'rgba(255,255,255,0.04)',
                             border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12,
-                            padding: '10px 14px 10px 36px', color: '#f2f2f2', fontSize: 13, outline: 'none'
+                            padding: '10px 14px 10px 36px', color: 'var(--text)', fontSize: 13, outline: 'none'
                         }} />
                 </div>
 
                 <div>
                     {chairRevealed && chair && <ChairCard person={chair} isMobile={isMobile} onDismiss={() => setChairRevealed(false)} />}
                     {filtered.length === 0 ? (
-                        <p style={{ color: 'rgba(255,255,255,0.25)', textAlign: 'center', padding: '80px 0' }}>No results for "{query}"</p>
+                        <p style={{ color: 'var(--text-faint, #8a8a8a)', textAlign: 'center', padding: '80px 0' }}>No results for "{query}"</p>
                     ) : (
                         <div style={{
                             display: 'grid',
@@ -374,7 +374,7 @@ export default function TeamPage() {
                     )}
                 </div>
 
-                <p style={{ fontSize: '10px', color: '#1a1a1a', letterSpacing: '0.1em', textTransform: 'uppercase', textAlign: 'center', paddingBottom: '16px' }}>
+                <p style={{ fontSize: '10px', color: 'var(--text-ghost, #1a1a1a)', letterSpacing: '0.1em', textTransform: 'uppercase', textAlign: 'center', paddingBottom: '16px' }}>
                     Try showAlter('name') in the console
                 </p>
             </div>

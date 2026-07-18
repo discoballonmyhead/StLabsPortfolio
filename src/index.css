@@ -17,9 +17,9 @@
   --border-light: #2a2a2a;
 
   /* Text scale — brighter and more readable */
-  --text: #f2f2f2;
-  --text-muted: #999;
-  --text-dim: #555;
+  --text: #ffffff;
+  --text-muted: #e0e0e0;
+  --text-dim: #bebebe;
 
   --accent: #f2f2f2;
 

@@ -201,7 +201,7 @@ function ClassifiedCard({
         <div style={{
           position: 'absolute', top: '10px', right: '10px',
           fontSize: '9px', fontWeight: 700, letterSpacing: '0.12em',
-          textTransform: 'uppercase', color: '#3a3a3a',
+          textTransform: 'uppercase', color: 'var(--text-faint, #8a8a8a)',
           fontFamily: 'var(--font-mono)',
         }}>
           ████-██
@@ -220,7 +220,7 @@ function ClassifiedCard({
         <h2 style={{
           fontSize: 'clamp(15px, 1.8vw, 17px)',
           fontWeight: 700,
-          color: '#f2f2f2',
+          color: 'var(--text)',
           letterSpacing: '-0.02em',
           lineHeight: 1.2,
           margin: 0,
@@ -241,7 +241,7 @@ function ClassifiedCard({
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', flexShrink: 0 }}>
           {['46px', '58px', '38px'].map((w, i) => (
             <span key={i} style={{
-              background: '#111', border: '1px solid #1e1e1e',
+              background: '#111', border: '1px solid var(--border)',
               padding: '2px 7px', borderRadius: '4px', lineHeight: 1.6,
               display: 'inline-flex', alignItems: 'center',
             }}>
@@ -256,11 +256,11 @@ function ClassifiedCard({
           justifyContent: 'space-between',
           alignItems: 'center',
           paddingTop: '10px',
-          borderTop: '1px solid #141414',
+          borderTop: '1px solid var(--border-faint, #141414)',
           flexShrink: 0,
         }}>
           <span style={{
-            fontSize: '10px', color: '#3a3a3a',
+            fontSize: '10px', color: 'var(--text-faint, #8a8a8a)',
             letterSpacing: '0.08em', textTransform: 'uppercase',
             fontFamily: 'var(--font-mono)',
           }}>
@@ -315,7 +315,7 @@ function MemeModal({ p, onClose }: { p: Project; onClose: () => void }) {
           maxWidth: 'min(680px, 92vw)',
           width: '100%',
           background: '#0a0a0a',
-          border: '1px solid #1e1e1e',
+          border: '1px solid var(--border)',
           borderRadius: '12px',
           overflow: 'hidden',
           cursor: 'default',
@@ -325,7 +325,7 @@ function MemeModal({ p, onClose }: { p: Project; onClose: () => void }) {
         {/* Header strip */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 14px', borderBottom: '1px solid #161616',
+          padding: '10px 14px', borderBottom: '1px solid var(--border-faint, #161616)',
         }}>
           <span style={{
             fontSize: '10px', fontWeight: 700, letterSpacing: '0.18em',
@@ -338,11 +338,11 @@ function MemeModal({ p, onClose }: { p: Project; onClose: () => void }) {
             onClick={onClose}
             aria-label="Close"
             style={{
-              background: 'none', border: 'none', color: '#555',
+              background: 'none', border: 'none', color: 'var(--text-dim)',
               fontSize: '16px', lineHeight: 1, cursor: 'pointer', padding: '4px',
             }}
-            onMouseEnter={e => (e.currentTarget.style.color = '#f0f0f0')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#555')}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-dim)')}
           >
             ×
           </button>
@@ -377,11 +377,11 @@ function MemeModal({ p, onClose }: { p: Project; onClose: () => void }) {
             }}>
               Access denied
             </span>
-            <p style={{ fontSize: '12px', color: '#555', lineHeight: 1.7, maxWidth: '340px', margin: 0 }}>
+            <p style={{ fontSize: '12px', color: 'var(--text-dim)', lineHeight: 1.7, maxWidth: '340px', margin: 0 }}>
               Your clearance level is insufficient to view this asset.
             </p>
             <p style={{
-              fontSize: '10px', color: '#2e2e2e', margin: 0,
+              fontSize: '10px', color: 'var(--text-ghost, #6a6a6a)', margin: 0,
               fontFamily: 'var(--font-mono)',
             }}>
               ref: {memeGifSrc(p)}
@@ -390,8 +390,8 @@ function MemeModal({ p, onClose }: { p: Project; onClose: () => void }) {
         )}
 
         <div style={{
-          padding: '8px 14px', borderTop: '1px solid #161616',
-          fontSize: '9px', color: '#2e2e2e',
+          padding: '8px 14px', borderTop: '1px solid var(--border-faint, #161616)',
+          fontSize: '9px', color: 'var(--text-ghost, #6a6a6a)',
           letterSpacing: '0.10em', textTransform: 'uppercase',
           fontFamily: 'var(--font-mono)', textAlign: 'right',
         }}>
@@ -422,7 +422,7 @@ function ProjectCard({
         style={{
           height: '100%',
           background: '#0a0a0a',
-          border: '1px solid #1a1a1a',
+          border: '1px solid var(--border-strong, #1a1a1a)',
           borderRadius: '12px',
           overflow: 'hidden',
           display: 'flex',
@@ -512,7 +512,7 @@ function ProjectCard({
           <h2 style={{
             fontSize: 'clamp(15px, 1.8vw, 17px)',
             fontWeight: 700,
-            color: '#f2f2f2',
+            color: 'var(--text)',
             letterSpacing: '-0.02em',
             lineHeight: 1.2,
             margin: 0,
@@ -524,7 +524,7 @@ function ProjectCard({
           {/* Tagline - always exactly 2 lines */}
           <p style={{
             fontSize: '12px',
-            color: '#555',
+            color: 'var(--text-dim)',
             lineHeight: 1.55,
             margin: 0,
             flexShrink: 0,
@@ -544,14 +544,14 @@ function ProjectCard({
             {p.tech.slice(0, 4).map((t: string) => (
               <span key={t} style={{
                 fontSize: '10px', fontWeight: 500,
-                color: '#3e3e3e', background: '#111',
-                border: '1px solid #1e1e1e',
+                color: 'var(--text-faint, #8a8a8a)', background: '#111',
+                border: '1px solid var(--border)',
                 padding: '2px 7px', borderRadius: '4px',
                 letterSpacing: '0.02em', lineHeight: 1.6,
               }}>{t}</span>
             ))}
             {p.tech.length > 4 && (
-              <span style={{ fontSize: '10px', color: '#2e2e2e', padding: '2px 4px', lineHeight: 1.6 }}>
+              <span style={{ fontSize: '10px', color: 'var(--text-ghost, #6a6a6a)', padding: '2px 4px', lineHeight: 1.6 }}>
                 +{p.tech.length - 4}
               </span>
             )}
@@ -563,20 +563,20 @@ function ProjectCard({
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingTop: '10px',
-            borderTop: '1px solid #141414',
+            borderTop: '1px solid var(--border-faint, #141414)',
             flexShrink: 0,
           }}>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span style={{ fontSize: '10px', color: '#333', letterSpacing: '0.04em' }}>{p.platform}</span>
-              <span style={{ color: '#222', fontSize: '8px' }}>·</span>
-              <span style={{ fontSize: '10px', color: '#333', fontFamily: 'var(--font-mono)' }}>{p.year}</span>
+              <span style={{ fontSize: '10px', color: 'var(--text-faint, #8a8a8a)', letterSpacing: '0.04em' }}>{p.platform}</span>
+              <span style={{ color: 'var(--text-ghost, #6a6a6a)', fontSize: '8px' }}>·</span>
+              <span style={{ fontSize: '10px', color: 'var(--text-faint, #8a8a8a)', fontFamily: 'var(--font-mono)' }}>{p.year}</span>
             </div>
             {/* Show arrow only for public/accessible apps */}
             {!shouldHideStoreLinks(vis) ? (
               <span style={{ fontSize: '14px', color: statusColors.fg, opacity: 0.65 }}>{''}</span>
             ) : (
               <span style={{
-                fontSize: '9px', color: '#333',
+                fontSize: '9px', color: 'var(--text-faint, #8a8a8a)',
                 letterSpacing: '0.08em', textTransform: 'uppercase',
               }}>
                 Not public
@@ -600,7 +600,7 @@ function InactiveRow({ p }: { p: Project }) {
       gap: '12px',
       padding: '12px 14px',
       background: '#080808',
-      border: '1px solid #111',
+      border: '1px solid var(--border-faint, #111)',
       borderRadius: '8px',
     }}>
       <img
@@ -608,7 +608,7 @@ function InactiveRow({ p }: { p: Project }) {
         alt=""
         style={{
           width: '34px', height: '34px', borderRadius: '8px',
-          border: '1px solid #1a1a1a', flexShrink: 0,
+          border: '1px solid var(--border-strong, #1a1a1a)', flexShrink: 0,
           filter: 'grayscale(1) opacity(0.35)', objectFit: 'cover',
         }}
         onError={e => {
@@ -623,21 +623,21 @@ function InactiveRow({ p }: { p: Project }) {
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '2px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: '#333' }}>{p.name}</span>
+          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-faint, #8a8a8a)' }}>{p.name}</span>
           <span style={{ ...statusStyle(p.status as ProjectStatus), opacity: 0.5 }}>{p.status}</span>
           {vis && vis !== 'Public' && (
             <span style={{ ...visibilityBadgeStyle(vis), opacity: 0.5 }}>{vis}</span>
           )}
         </div>
         <p style={{
-          fontSize: '11px', color: '#262626', margin: 0,
+          fontSize: '11px', color: 'var(--text-ghost, #6a6a6a)', margin: 0,
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>{p.tagline}</p>
       </div>
 
       <div style={{
         display: 'flex', gap: '6px', alignItems: 'center',
-        flexShrink: 0, fontSize: '10px', color: '#222',
+        flexShrink: 0, fontSize: '10px', color: 'var(--text-ghost, #6a6a6a)',
         fontFamily: 'var(--font-mono)',
       }}>
         <span>{p.platform}</span>
@@ -654,14 +654,14 @@ function SectionHeading({ children, count }: { children: React.ReactNode; count:
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <span style={{
         fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em',
-        textTransform: 'uppercase', color: '#3a3a3a', whiteSpace: 'nowrap',
+        textTransform: 'uppercase', color: 'var(--text-faint, #8a8a8a)', whiteSpace: 'nowrap',
       }}>{children}</span>
       <span style={{
-        fontSize: '10px', fontWeight: 700, color: '#2a2a2a',
-        background: '#111', border: '1px solid #1a1a1a',
+        fontSize: '10px', fontWeight: 700, color: 'var(--text-ghost, #6a6a6a)',
+        background: '#111', border: '1px solid var(--border-strong, #1a1a1a)',
         padding: '1px 7px', borderRadius: '20px', fontFamily: 'var(--font-mono)',
       }}>{count}</span>
-      <div style={{ flex: 1, height: '1px', background: '#141414' }} />
+      <div style={{ flex: 1, height: '1px', background: 'var(--border-faint, #141414)' }} />
     </div>
   )
 }
@@ -685,18 +685,18 @@ export default function Projects() {
         <header style={{ paddingTop: '24px' }}>
           <p style={{
             fontSize: '11px', fontWeight: 600, letterSpacing: '0.16em',
-            textTransform: 'uppercase', color: '#555', marginBottom: '14px',
+            textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '14px',
           }}>
             {projectsPage.eyebrow}
           </p>
           <h1 style={{
             fontSize: 'clamp(36px, 5vw, 56px)', fontWeight: 700,
             letterSpacing: '-0.03em', lineHeight: 1.05,
-            color: '#f2f2f2', marginBottom: '16px',
+            color: 'var(--text)', marginBottom: '16px',
           }}>
             {projectsPage.heading}
           </h1>
-          <p style={{ fontSize: '15px', color: '#666', lineHeight: 1.7, maxWidth: '480px' }}>
+          <p style={{ fontSize: '15px', color: 'var(--text-muted)', lineHeight: 1.7, maxWidth: '480px' }}>
             {projectsPage.subtext}
           </p>
         </header>
@@ -710,10 +710,10 @@ export default function Projects() {
           ] as const).map((s, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {i > 0 && (
-                <span style={{ width: '1px', height: '11px', background: '#1e1e1e', flexShrink: 0 }} />
+                <span style={{ width: '1px', height: '11px', background: 'var(--border)', flexShrink: 0 }} />
               )}
               <span style={{
-                fontSize: '11px', color: s.muted ? '#2e2e2e' : '#444',
+                fontSize: '11px', color: s.muted ? 'var(--text-ghost, #6a6a6a)' : 'var(--text-dim)',
                 letterSpacing: '0.06em',
               }}>
                 {s.label}
@@ -751,7 +751,7 @@ export default function Projects() {
               {projectsPage.inactiveSectionLabel}
             </SectionHeading>
             <p style={{
-              fontSize: '12px', color: '#2e2e2e',
+              fontSize: '12px', color: 'var(--text-faint, #8a8a8a)',
               lineHeight: 1.6, maxWidth: '480px', marginTop: '-2px',
             }}>
               {projectsPage.inactiveNote}
