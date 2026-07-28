@@ -59,6 +59,7 @@ export const assets = {
   // Per project app icons. Add a key here, then point a project's
   // appIconPath at it, for example: appIconPath: assets.icons.projectKin
   icons: {
+    projectBeyXBuilder: '/icons/bey-builder-x.png',
     projectBlinkoAdmin: '/icons/blinko-admin.png',
     projectVault: '/icons/project-vault.png',
     projectKin: '/icons/project-kin.png',
@@ -604,11 +605,33 @@ export interface PrivacyConfig {
   localStorageNote?: string
 }
 
+// Official app store listings. These are the "install it properly" links.
 export interface StoreLinks {
   googlePlay?: string
   appStore?: string
   web?: string
   github?: string
+}
+
+// Direct builds: anything you can open or download without going through a
+// store. Web builds, itch pages, raw installers, source, test tracks. Every
+// field is optional and only the ones you fill in get rendered, so a web only
+// project just sets `web` and nothing else appears.
+//
+//   build: { web: 'https://play.example.com' }
+//   build: { itch: '...', windows: '...', apk: '...' }
+//   build: { other: [{ label: 'Dev diary', href: 'https://...' }] }
+export interface BuildLinks {
+  web?: string
+  itch?: string
+  apk?: string
+  windows?: string
+  macos?: string
+  linux?: string
+  github?: string
+  testflight?: string
+  /** Anything that does not fit the fields above. */
+  other?: { label: string; href: string }[]
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -628,8 +651,10 @@ export interface ProjectConfig {
   about: string[]
   features?: string[]
   stackNotes?: string[]
-  stores?: StoreLinks
+  stores?: StoreLinks   // app store listings
   storeNote?: string
+  build?: BuildLinks   // direct builds, web links, installers, source
+  buildNote?: string
   legalNote?: string
   privacy: PrivacyConfig
 
@@ -657,6 +682,56 @@ export interface ProjectConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const projects: ProjectConfig[] = [
+  {
+    slug: 'bey-builder-x',
+    name: 'Bey Builder X',
+    tagline: 'A Beyblade X combo randomizer, tournament ladder, and versus picker.',
+    year: '2026',
+    platform: 'Web',
+    status: 'In Development',
+    tech: ['Flutter', 'Dart', 'Web', 'Supabase'],
+    label: 'Web App · 2026',
+    appIconPath: assets.icons.projectBeyXBuilder,
+
+    about: [
+      'A Flutter web app for Beyblade X fans. Three fair spinners for Blades, Ratchets, and Bits, with weighted gacha odds shown live and the pick code visible as it runs. Includes a random versus selector, a single elimination tournament ladder with save and resume plus image export, and a versus mode that builds a full combo for each contender.',
+      'Built with BLoC state management and Clean Architecture. Spins are token verified against a signed server receipt, so a result cannot be quietly re rolled or forged.',
+    ],
+
+    features: [
+      'Three wheel and slot machine combo spinners',
+      'Randomizer and weighted gacha sub modes with live odds',
+      'Versus mode: build a combo per contender, one on one',
+      'Single elimination tournament ladder with byes',
+      'Save and resume tournaments, export the bracket as an image',
+      'Token verified spins backed by a signed server receipt',
+      'No account required, progress saved in your browser',
+    ],
+
+    stackNotes: [
+      'Flutter web with BLoC and Clean Architecture',
+      'Supabase for signed spin receipts and verification',
+      'Weighted gacha table with the pick code surfaced live',
+      'Local storage for tournament save and resume',
+    ],
+
+    build: { web: '/builds/bey-builder-x/index.html' },
+    buildNote: 'Public build, in active development. Nothing to install, it runs in the browser.',
+    legalNote: 'No account required. Progress is stored only in your browser. Token mode records IP and coarse location for verified spins.',
+
+    privacy: {
+      updated: 'July 26, 2026',
+      contact: 'info@stateless-labs.com',
+      collectsData: true,
+      androidPermission: false,
+      summaryOverride: 'No account, no profile. The only thing recorded is what token verified spins need in order to prove a result was not forged.',
+      dataCollected: [
+        'IP address and coarse location, recorded only for token verified spins',
+        'Spin receipts, so a verified result can be checked later',
+      ],
+    },
+  },
+
   {
     slug: 'blinko-admin',
     name: 'Blinko Analytics',

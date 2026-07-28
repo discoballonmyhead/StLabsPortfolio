@@ -1,0 +1,57 @@
+{
+  "site": {
+    "title": "Bey Builder X",
+    "appBarTitle": "BEY BUILDER X"
+  },
+  "hero": {
+    "greeting": "build your bey. trust the math.",
+    "title": "BEY BUILDER X",
+    "subtitle": "Roll a Blade, a Ratchet, and a Bit. Some ratchet-integrated parts (Turbo, Bullet Griffon) fill two slots at once, so the third machine locks out. Gacha mode weights by rarity and celebrates big pulls."
+  },
+  "drawer": {
+    "title": "YOUR PARTS",
+    "subtitle": "Add your own beys/parts \u2014 saved in this browser only. Add duplicates freely for how many you own.",
+    "resetLabel": "Reset to bundled parts"
+  },
+  "footer": {
+    "banner": "NO ACCOUNTS \u00b7 NO TRACKING \u00b7 NO SERVERS",
+    "privacyStatement": "This site does not collect, transmit, or store any personal data. Names you add stay only in your own browser's local storage and never leave your device. No age verification is required because nothing about you is processed."
+  },
+  "data": {
+    "wheelTiersAsset": "assets/data/wheel_tiers.json",
+    "slotTiersAsset": "assets/data/slot_tiers.json"
+  },
+  "audio": {
+    "enabled": true,
+    "wheelTick": "assets/audio/wheel_tick.mp3",
+    "slotTick": "assets/audio/slot_tick.mp3",
+    "slotStop": "assets/audio/slot_stop.mp3",
+    "spinLoop": "assets/audio/spin_loop.mp3",
+    "win": {
+      "common": "assets/audio/win_common.mp3",
+      "rare": "assets/audio/win_rare.mp3",
+      "epic": "assets/audio/win_epic.mp3",
+      "legendary": "assets/audio/win_legendary.mp3"
+    }
+  },
+  "spin": {
+    "stepDelayMs": 380,
+    "spinDurationMs": 3600,
+    "cascadeStopMs": 700,
+    "showTurns": 4
+  },
+  "rarity": {
+    "order": [
+      "common",
+      "rare",
+      "epic",
+      "legendary"
+    ],
+    "colors": {
+      "common": "#9AA6C4",
+      "rare": "#5AC7E6",
+      "epic": "#B98CFF",
+      "legendary": "#FFC24B"
+    }
+  }
+}
