@@ -1,0 +1,404 @@
+{
+  "_note": "Radar stat values, kept separate so they can be edited independently. Key = tierId:releaseCode:baseName. null means unknown (charts as 0).",
+  "axes": [
+    "attack",
+    "defense",
+    "stamina",
+    "dash",
+    "burstRes"
+  ],
+  "stats": {
+    "blades:BX-46:Cobalt Drake (Red)": {
+      "attack": 65,
+      "defense": 30,
+      "stamina": 20,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-46:Tackle Goat": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-17:Dran Sword (Red)": {
+      "attack": 55,
+      "defense": 15,
+      "stamina": 30,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-17:Wizard Arrow (Blue)": {
+      "attack": 15,
+      "defense": 30,
+      "stamina": 55,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:UX-08:Silver Wolf": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-21:Hells Chain": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-21:Knight Lance": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-21:Wizard Arrow": {
+      "attack": 15,
+      "defense": 30,
+      "stamina": 55,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-05:Wizard Arrow": {
+      "attack": 15,
+      "defense": 30,
+      "stamina": 55,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:CX-07:Pegasus Blast": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:UX-14:Scorpio Spear": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-06:Knight Shield": {
+      "attack": 20,
+      "defense": 55,
+      "stamina": 25,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-01:Dran Sword": {
+      "attack": 55,
+      "defense": 15,
+      "stamina": 30,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:UX-02:Hells Hammer": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-31:Shark Edge (Keel Shark)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:UX-06:Leon Crest": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:CX-01:Dran Brave": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:CX-02:Wizard Arc": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "blades:BX-13:Knight Lance": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-46:9-60 (Red)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-46:7-70": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-17:3-60 (Red)": {
+      "attack": 15,
+      "defense": 11,
+      "stamina": 9,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-17:4-80 (Blue)": {
+      "attack": 11,
+      "defense": 11,
+      "stamina": 8,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:UX-08:3-80": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-21:5-60": {
+      "attack": 10,
+      "defense": 15,
+      "stamina": 10,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-21:3-60": {
+      "attack": 15,
+      "defense": 11,
+      "stamina": 9,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-21:4-80": {
+      "attack": 11,
+      "defense": 11,
+      "stamina": 8,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-05:4-80": {
+      "attack": 11,
+      "defense": 11,
+      "stamina": 8,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:CX-07:ATr (Turbo)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:UX-14:0-70": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-06:3-80": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-01:3-60": {
+      "attack": 15,
+      "defense": 11,
+      "stamina": 9,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:UX-02:3-70": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-31:1-60": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:UX-06:7-60": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:CX-01:S6-60": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:CX-02:R4-55": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "ratchets:BX-13:4-80": {
+      "attack": 11,
+      "defense": 11,
+      "stamina": 8,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:BX-46:R (Rush)": {
+      "attack": 35,
+      "defense": 10,
+      "stamina": 15,
+      "dash": 30,
+      "burstRes": 80
+    },
+    "bits:BX-46:T (Taper)": {
+      "attack": 30,
+      "defense": 15,
+      "stamina": 15,
+      "dash": 25,
+      "burstRes": 80
+    },
+    "bits:BX-17:F (Flat)": {
+      "attack": 40,
+      "defense": 10,
+      "stamina": 10,
+      "dash": 35,
+      "burstRes": 80
+    },
+    "bits:BX-17:B (Ball)": {
+      "attack": 15,
+      "defense": 25,
+      "stamina": 50,
+      "dash": 10,
+      "burstRes": 30
+    },
+    "bits:UX-08:FB (Free Ball)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:BX-21:HT (High Taper)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:BX-21:LF (Low Flat)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:BX-21:N (Needle)": {
+      "attack": 10,
+      "defense": 45,
+      "stamina": 20,
+      "dash": 10,
+      "burstRes": 30
+    },
+    "bits:BX-05:B (Ball)": {
+      "attack": 15,
+      "defense": 25,
+      "stamina": 50,
+      "dash": 10,
+      "burstRes": 30
+    },
+    "bits:UX-14:Z (Zephyr / Zap)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:BX-06:N (Needle)": {
+      "attack": 10,
+      "defense": 45,
+      "stamina": 20,
+      "dash": 10,
+      "burstRes": 30
+    },
+    "bits:BX-01:F (Flat)": {
+      "attack": 40,
+      "defense": 10,
+      "stamina": 10,
+      "dash": 35,
+      "burstRes": 80
+    },
+    "bits:UX-02:H (Hexa)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:BX-31:Q (Quake)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:UX-06:GN (Gear Needle)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:CX-01:V (Variable)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:CX-02:LO (Low Orb)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    },
+    "bits:BX-13:HN (High Needle)": {
+      "attack": null,
+      "defense": null,
+      "stamina": null,
+      "dash": null,
+      "burstRes": null
+    }
+  }
+}

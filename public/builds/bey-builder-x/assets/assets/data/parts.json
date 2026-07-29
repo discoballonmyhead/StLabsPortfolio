@@ -1,0 +1,585 @@
+{
+  "axes": [
+    "attack",
+    "defense",
+    "stamina",
+    "dash",
+    "burstRes"
+  ],
+  "axisLabels": {
+    "attack": "Attack",
+    "defense": "Defense",
+    "stamina": "Stamina",
+    "dash": "Dash",
+    "burstRes": "Burst Res"
+  },
+  "priceBands": {
+    "common": "< 2000",
+    "rare": "2000-3999",
+    "epic": "4000-6099",
+    "legendary": ">= 6100"
+  },
+  "tiers": [
+    {
+      "id": "blades",
+      "category": "Blades",
+      "items": [
+        {
+          "name": "Cobalt Drake (Red) [BX-46]",
+          "baseName": "Cobalt Drake (Red)",
+          "code": "BX-46",
+          "msrp": 7500,
+          "rarity": "legendary",
+          "weight": 4,
+          "type": "Attack",
+          "spin": "Right"
+        },
+        {
+          "name": "Tackle Goat [BX-46]",
+          "baseName": "Tackle Goat",
+          "code": "BX-46",
+          "msrp": 7500,
+          "rarity": "legendary",
+          "weight": 4,
+          "type": "Balance",
+          "spin": "Right"
+        },
+        {
+          "name": "Dran Sword (Red) [BX-17]",
+          "baseName": "Dran Sword (Red)",
+          "code": "BX-17",
+          "msrp": 6050,
+          "rarity": "epic",
+          "weight": 8,
+          "type": "Attack",
+          "spin": "Right"
+        },
+        {
+          "name": "Wizard Arrow (Blue) [BX-17]",
+          "baseName": "Wizard Arrow (Blue)",
+          "code": "BX-17",
+          "msrp": 6050,
+          "rarity": "epic",
+          "weight": 8,
+          "type": "Stamina",
+          "spin": "Right"
+        },
+        {
+          "name": "Silver Wolf [UX-08]",
+          "baseName": "Silver Wolf",
+          "code": "UX-08",
+          "msrp": 2420,
+          "rarity": "rare",
+          "weight": 14,
+          "type": "Stamina",
+          "spin": "Right"
+        },
+        {
+          "name": "Hells Chain [BX-21]",
+          "baseName": "Hells Chain",
+          "code": "BX-21",
+          "msrp": 3960,
+          "rarity": "rare",
+          "weight": 14,
+          "type": "Balance",
+          "spin": "Right"
+        },
+        {
+          "name": "Knight Lance [BX-21]",
+          "baseName": "Knight Lance",
+          "code": "BX-21",
+          "msrp": 3960,
+          "rarity": "rare",
+          "weight": 14,
+          "type": "Defense",
+          "spin": "Right"
+        },
+        {
+          "name": "Wizard Arrow [BX-21]",
+          "baseName": "Wizard Arrow",
+          "code": "BX-21",
+          "msrp": 3960,
+          "rarity": "rare",
+          "weight": 14,
+          "type": "Stamina",
+          "spin": "Right"
+        },
+        {
+          "name": "Wizard Arrow [BX-05]",
+          "baseName": "Wizard Arrow",
+          "code": "BX-05",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "type": "Stamina",
+          "spin": "Right"
+        },
+        {
+          "name": "Pegasus Blast [CX-07]",
+          "baseName": "Pegasus Blast",
+          "code": "CX-07",
+          "msrp": 2420,
+          "rarity": "rare",
+          "weight": 14,
+          "type": "Attack",
+          "spin": "Right"
+        },
+        {
+          "name": "Scorpio Spear [UX-14]",
+          "baseName": "Scorpio Spear",
+          "code": "UX-14",
+          "msrp": 2420,
+          "rarity": "rare",
+          "weight": 14,
+          "type": "Balance",
+          "spin": "Right"
+        },
+        {
+          "name": "Knight Shield [BX-06]",
+          "baseName": "Knight Shield",
+          "code": "BX-06",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "type": "Defense",
+          "spin": "Right"
+        },
+        {
+          "name": "Dran Sword [BX-01]",
+          "baseName": "Dran Sword",
+          "code": "BX-01",
+          "msrp": 1980,
+          "rarity": "common",
+          "weight": 30,
+          "type": "Attack",
+          "spin": "Right"
+        },
+        {
+          "name": "Hells Hammer [UX-02]",
+          "baseName": "Hells Hammer",
+          "code": "UX-02",
+          "msrp": 1980,
+          "rarity": "common",
+          "weight": 30,
+          "type": "Balance",
+          "spin": "Right"
+        },
+        {
+          "name": "Shark Edge (Keel Shark) [BX-31]",
+          "baseName": "Shark Edge (Keel Shark)",
+          "code": "BX-31",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "type": "Attack",
+          "spin": "Right"
+        },
+        {
+          "name": "Leon Crest [UX-06]",
+          "baseName": "Leon Crest",
+          "code": "UX-06",
+          "msrp": 1980,
+          "rarity": "common",
+          "weight": 30,
+          "type": "Defense",
+          "spin": "Right"
+        },
+        {
+          "name": "Dran Brave [CX-01]",
+          "baseName": "Dran Brave",
+          "code": "CX-01",
+          "msrp": 2200,
+          "rarity": "rare",
+          "weight": 14,
+          "type": "Attack",
+          "spin": "Right"
+        },
+        {
+          "name": "Wizard Arc [CX-02]",
+          "baseName": "Wizard Arc",
+          "code": "CX-02",
+          "msrp": 2200,
+          "rarity": "rare",
+          "weight": 14,
+          "type": "Stamina",
+          "spin": "Right"
+        },
+        {
+          "name": "Knight Lance [BX-13]",
+          "baseName": "Knight Lance",
+          "code": "BX-13",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "type": "Defense",
+          "spin": "Right"
+        }
+      ]
+    },
+    {
+      "id": "ratchets",
+      "category": "Ratchets",
+      "items": [
+        {
+          "name": "9-60 (Red) [BX-46]",
+          "baseName": "9-60 (Red)",
+          "code": "BX-46",
+          "msrp": 7500,
+          "rarity": "legendary",
+          "weight": 4,
+          "bladesDesc": "9 Blades",
+          "heightMm": 60
+        },
+        {
+          "name": "7-70 [BX-46]",
+          "baseName": "7-70",
+          "code": "BX-46",
+          "msrp": 7500,
+          "rarity": "legendary",
+          "weight": 4,
+          "bladesDesc": "7 Blades",
+          "heightMm": 70
+        },
+        {
+          "name": "3-60 (Red) [BX-17]",
+          "baseName": "3-60 (Red)",
+          "code": "BX-17",
+          "msrp": 6050,
+          "rarity": "epic",
+          "weight": 8,
+          "bladesDesc": "3 Blades",
+          "heightMm": 60
+        },
+        {
+          "name": "4-80 (Blue) [BX-17]",
+          "baseName": "4-80 (Blue)",
+          "code": "BX-17",
+          "msrp": 6050,
+          "rarity": "epic",
+          "weight": 8,
+          "bladesDesc": "4 Blades",
+          "heightMm": 80
+        },
+        {
+          "name": "3-80 [UX-08]",
+          "baseName": "3-80",
+          "code": "UX-08",
+          "msrp": 2420,
+          "rarity": "rare",
+          "weight": 14,
+          "bladesDesc": "3 Blades",
+          "heightMm": 80
+        },
+        {
+          "name": "5-60 [BX-21]",
+          "baseName": "5-60",
+          "code": "BX-21",
+          "msrp": 3960,
+          "rarity": "rare",
+          "weight": 14,
+          "bladesDesc": "5 Blades",
+          "heightMm": 60
+        },
+        {
+          "name": "3-60 [BX-21]",
+          "baseName": "3-60",
+          "code": "BX-21",
+          "msrp": 3960,
+          "rarity": "rare",
+          "weight": 14,
+          "bladesDesc": "3 Blades",
+          "heightMm": 60
+        },
+        {
+          "name": "4-80 [BX-21]",
+          "baseName": "4-80",
+          "code": "BX-21",
+          "msrp": 3960,
+          "rarity": "rare",
+          "weight": 14,
+          "bladesDesc": "4 Blades",
+          "heightMm": 80
+        },
+        {
+          "name": "4-80 [BX-05]",
+          "baseName": "4-80",
+          "code": "BX-05",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "bladesDesc": "4 Blades",
+          "heightMm": 80
+        },
+        {
+          "name": "ATr (Turbo) [CX-07]",
+          "baseName": "ATr (Turbo)",
+          "code": "CX-07",
+          "msrp": 2420,
+          "rarity": "rare",
+          "weight": 14,
+          "bladesDesc": "Integrated Core",
+          "heightMm": null,
+          "disablesNext": true
+        },
+        {
+          "name": "0-70 [UX-14]",
+          "baseName": "0-70",
+          "code": "UX-14",
+          "msrp": 2420,
+          "rarity": "rare",
+          "weight": 14,
+          "bladesDesc": "0 (Perfect Circle)",
+          "heightMm": 70
+        },
+        {
+          "name": "3-80 [BX-06]",
+          "baseName": "3-80",
+          "code": "BX-06",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "bladesDesc": "3 Blades",
+          "heightMm": 80
+        },
+        {
+          "name": "3-60 [BX-01]",
+          "baseName": "3-60",
+          "code": "BX-01",
+          "msrp": 1980,
+          "rarity": "common",
+          "weight": 30,
+          "bladesDesc": "3 Blades",
+          "heightMm": 60
+        },
+        {
+          "name": "3-70 [UX-02]",
+          "baseName": "3-70",
+          "code": "UX-02",
+          "msrp": 1980,
+          "rarity": "common",
+          "weight": 30,
+          "bladesDesc": "3 Blades",
+          "heightMm": 70
+        },
+        {
+          "name": "1-60 [BX-31]",
+          "baseName": "1-60",
+          "code": "BX-31",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "bladesDesc": "1 Blade",
+          "heightMm": 60
+        },
+        {
+          "name": "7-60 [UX-06]",
+          "baseName": "7-60",
+          "code": "UX-06",
+          "msrp": 1980,
+          "rarity": "common",
+          "weight": 30,
+          "bladesDesc": "7 Blades",
+          "heightMm": 60
+        },
+        {
+          "name": "S6-60 [CX-01]",
+          "baseName": "S6-60",
+          "code": "CX-01",
+          "msrp": 2200,
+          "rarity": "rare",
+          "weight": 14,
+          "bladesDesc": "S6 Structure",
+          "heightMm": 60
+        },
+        {
+          "name": "R4-55 [CX-02]",
+          "baseName": "R4-55",
+          "code": "CX-02",
+          "msrp": 2200,
+          "rarity": "rare",
+          "weight": 14,
+          "bladesDesc": "R4 Structure",
+          "heightMm": 55
+        },
+        {
+          "name": "4-80 [BX-13]",
+          "baseName": "4-80",
+          "code": "BX-13",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "bladesDesc": "4 Blades",
+          "heightMm": 80
+        }
+      ]
+    },
+    {
+      "id": "bits",
+      "category": "Bits",
+      "items": [
+        {
+          "name": "R (Rush) [BX-46]",
+          "baseName": "R (Rush)",
+          "code": "BX-46",
+          "msrp": 7500,
+          "rarity": "legendary",
+          "weight": 4,
+          "mechanic": "Flat base geared for rapid, consecutive X-Dash attacks"
+        },
+        {
+          "name": "T (Taper) [BX-46]",
+          "baseName": "T (Taper)",
+          "code": "BX-46",
+          "msrp": 7500,
+          "rarity": "legendary",
+          "weight": 4,
+          "mechanic": "Angled flat tip offering a mix of movement and stamina"
+        },
+        {
+          "name": "F (Flat) [BX-17]",
+          "baseName": "F (Flat)",
+          "code": "BX-17",
+          "msrp": 6050,
+          "rarity": "epic",
+          "weight": 8,
+          "mechanic": "Wide flat base for maximum speed and aggressive movement"
+        },
+        {
+          "name": "B (Ball) [BX-17]",
+          "baseName": "B (Ball)",
+          "code": "BX-17",
+          "msrp": 6050,
+          "rarity": "epic",
+          "weight": 8,
+          "mechanic": "Semi-spherical tip designed to hold the center and out-spin opponents"
+        },
+        {
+          "name": "FB (Free Ball) [UX-08]",
+          "baseName": "FB (Free Ball)",
+          "code": "UX-08",
+          "msrp": 2420,
+          "rarity": "rare",
+          "weight": 14,
+          "mechanic": "Free-spinning ball tip that absorbs impacts to retain stamina"
+        },
+        {
+          "name": "HT (High Taper) [BX-21]",
+          "baseName": "HT (High Taper)",
+          "code": "BX-21",
+          "msrp": 3960,
+          "rarity": "rare",
+          "weight": 14,
+          "mechanic": "A taller version of Taper, increasing smash attack angles"
+        },
+        {
+          "name": "LF (Low Flat) [BX-21]",
+          "baseName": "LF (Low Flat)",
+          "code": "BX-21",
+          "msrp": 3960,
+          "rarity": "rare",
+          "weight": 14,
+          "mechanic": "Shorter flat tip for digging under opponents for uppercuts"
+        },
+        {
+          "name": "N (Needle) [BX-21]",
+          "baseName": "N (Needle)",
+          "code": "BX-21",
+          "msrp": 3960,
+          "rarity": "rare",
+          "weight": 14,
+          "mechanic": "Sharp pointed tip for resisting knock-outs and holding ground"
+        },
+        {
+          "name": "B (Ball) [BX-05]",
+          "baseName": "B (Ball)",
+          "code": "BX-05",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "mechanic": "Semi-spherical tip for stability and stamina"
+        },
+        {
+          "name": "Z (Zephyr / Zap) [UX-14]",
+          "baseName": "Z (Zephyr / Zap)",
+          "code": "UX-14",
+          "msrp": 2420,
+          "rarity": "rare",
+          "weight": 14,
+          "mechanic": "Drifting tip that holds the center but sweeps into wide attacks on slopes"
+        },
+        {
+          "name": "N (Needle) [BX-06]",
+          "baseName": "N (Needle)",
+          "code": "BX-06",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "mechanic": "Sharp tip maximizing stationary defensive friction"
+        },
+        {
+          "name": "F (Flat) [BX-01]",
+          "baseName": "F (Flat)",
+          "code": "BX-01",
+          "msrp": 1980,
+          "rarity": "common",
+          "weight": 30,
+          "mechanic": "Core attack tip meant to grip the X-Line quickly"
+        },
+        {
+          "name": "H (Hexa) [UX-02]",
+          "baseName": "H (Hexa)",
+          "code": "UX-02",
+          "msrp": 1980,
+          "rarity": "common",
+          "weight": 30,
+          "mechanic": "6-sided tip that shifts between defensive centering and erratic movement"
+        },
+        {
+          "name": "Q (Quake) [BX-31]",
+          "baseName": "Q (Quake)",
+          "code": "BX-31",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "mechanic": "Asymmetrical, off-center tip causing erratic jumping attacks"
+        },
+        {
+          "name": "GN (Gear Needle) [UX-06]",
+          "baseName": "GN (Gear Needle)",
+          "code": "UX-06",
+          "msrp": 1980,
+          "rarity": "common",
+          "weight": 30,
+          "mechanic": "Pointed base surrounded by gears for catching the rim to counter-attack"
+        },
+        {
+          "name": "V (Variable) [CX-01]",
+          "baseName": "V (Variable)",
+          "code": "CX-01",
+          "msrp": 2200,
+          "rarity": "rare",
+          "weight": 14,
+          "mechanic": "Flat rubber-like core that changes movement patterns as it accelerates"
+        },
+        {
+          "name": "LO (Low Orb) [CX-02]",
+          "baseName": "LO (Low Orb)",
+          "code": "CX-02",
+          "msrp": 2200,
+          "rarity": "rare",
+          "weight": 14,
+          "mechanic": "Shorter, spherical tip designed to lower the center of gravity"
+        },
+        {
+          "name": "HN (High Needle) [BX-13]",
+          "baseName": "HN (High Needle)",
+          "code": "BX-13",
+          "msrp": 1400,
+          "rarity": "common",
+          "weight": 30,
+          "mechanic": "Taller pointed tip designed for downward strikes and top-heavy defense"
+        }
+      ]
+    }
+  ]
+}
