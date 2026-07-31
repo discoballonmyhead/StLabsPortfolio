@@ -25,6 +25,18 @@
       "category": "Blades",
       "items": [
         {
+          "name": "Fused Dragon [UX-EX01]",
+          "baseName": "Fused Dragon",
+          "code": "UX-EX01",
+          "msrp": 7000,
+          "rarity": "legendary",
+          "weight": 4,
+          "type": "Attack",
+          "spin": "Right",
+          "disablesNext": true,
+          "_note": "Expand-line blade that fuses the ratchet — voids the Ratchet class."
+        },
+        {
           "name": "Cobalt Drake (Red) [BX-46]",
           "baseName": "Cobalt Drake (Red)",
           "code": "BX-46",

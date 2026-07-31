@@ -682,55 +682,7 @@ export interface ProjectConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const projects: ProjectConfig[] = [
-  {
-    slug: 'bey-builder-x',
-    name: 'Bey Builder X',
-    tagline: 'A Beyblade X combo randomizer, tournament ladder, and versus picker.',
-    year: '2026',
-    platform: 'Web',
-    status: 'In Development',
-    tech: ['Flutter', 'Dart', 'Web', 'Supabase'],
-    label: 'Web App · 2026',
-    appIconPath: assets.icons.projectBeyXBuilder,
 
-    about: [
-      'A Flutter web app for Beyblade X fans. Three fair spinners for Blades, Ratchets, and Bits, with weighted gacha odds shown live and the pick code visible as it runs. Includes a random versus selector, a single elimination tournament ladder with save and resume plus image export, and a versus mode that builds a full combo for each contender.',
-      'Built with BLoC state management and Clean Architecture. Spins are token verified against a signed server receipt, so a result cannot be quietly re rolled or forged.',
-    ],
-
-    features: [
-      'Three wheel and slot machine combo spinners',
-      'Randomizer and weighted gacha sub modes with live odds',
-      'Versus mode: build a combo per contender, one on one',
-      'Single elimination tournament ladder with byes',
-      'Save and resume tournaments, export the bracket as an image',
-      'Token verified spins backed by a signed server receipt',
-      'No account required, progress saved in your browser',
-    ],
-
-    stackNotes: [
-      'Flutter web with BLoC and Clean Architecture',
-      'Supabase for signed spin receipts and verification',
-      'Weighted gacha table with the pick code surfaced live',
-      'Local storage for tournament save and resume',
-    ],
-
-    build: { web: '/builds/bey-builder-x/index.html' },
-    buildNote: 'Public build, in active development. Nothing to install, it runs in the browser.',
-    legalNote: 'No account required. Progress is stored only in your browser. Token mode records IP and coarse location for verified spins.',
-
-    privacy: {
-      updated: 'July 26, 2026',
-      contact: 'info@stateless-labs.com',
-      collectsData: true,
-      androidPermission: false,
-      summaryOverride: 'No account, no profile. The only thing recorded is what token verified spins need in order to prove a result was not forged.',
-      dataCollected: [
-        'IP address and coarse location, recorded only for token verified spins',
-        'Spin receipts, so a verified result can be checked later',
-      ],
-    },
-  },
 
   {
     slug: 'blinko-admin',
@@ -797,6 +749,52 @@ export const projects: ProjectConfig[] = [
     },
 
     hasEmailConfirmation: true,
+  },
+  {
+    slug: "bey-x-builder",
+    name: "Bey X Builder",
+    tagline: "A Beyblade X combo randomizer, gacha simulator, tournament ladder, and versus builder.",
+    year: "2026",
+    platform: "Web",
+    status: "In Development",
+    tech: ["Flutter", "Dart", "Web", "Supabase"],
+    label: "Web App · 2026",
+    appIconPath: "assets.icons.projectBeyXBuilder",
+
+    about: [
+      "A Flutter web app for Beyblade X fans that builds full combos (Blade + Ratchet + Bit) from three fair spinners, with weighted-gacha odds shown live and the fair-pick code visible as it runs. Each built combo gets a five-axis radar chart (Attack, Defense, Stamina, Dash, Burst Resistance) plus a per-part stat breakdown.",
+      "Modes include a uniform Randomizer, a party-simulation Gacha that pops combos already pulled in the session, a server-verified Token mode, and a 1v1 Versus builder where each contender's parts are removed from the pool once confirmed. Also includes a single-elimination tournament ladder with save/resume and image export, and a random VS selector. Built with BLoC state management and Clean Architecture.",
+      "No account required; progress is saved in the browser."
+    ],
+
+    features: [
+      "Three-spinner combo builder (wheels or slot reels)",
+      "Randomizer, Gacha (party pop), Token, and Versus modes",
+      "Five-axis radar chart per combo with per-part stats",
+      "Versus: confirm-to-lock parts, exclusive per contender",
+      "Single-elimination tournament ladder with byes",
+      "Save/resume tournaments and export the bracket as an image",
+      "Live fair-pick code, tappable to open full detail on any device",
+      "No account required; progress stored in your browser"
+    ],
+
+    stackNotes: [
+      "Flutter web with BLoC/Cubit state management",
+      "Clean Architecture per feature (domain / data / presentation)",
+      "Supabase Edge Functions + Ed25519-signed receipts for Token mode",
+      "Browser localStorage persistence with a global reset"
+    ],
+
+    build: { web: '/builds/bey-builder-x/index.html' },
+    storeNote: "Public build, in active development.",
+    legalNote: "No account required. Progress is stored only in your browser. Token mode (in development) will record IP and coarse location for server-verified spins.",
+
+    privacy: {
+      updated: "July 26, 2026",
+      contact: "info@stateless-labs.com",
+      collectsData: false,
+      androidPermission: false
+    }
   },
 
   {

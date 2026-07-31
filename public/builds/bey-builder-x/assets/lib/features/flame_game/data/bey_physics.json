@@ -1,0 +1,75 @@
+{
+  "_README": {
+    "purpose": "Battle-physics attributes for each part, kept SEPARATE from the radar stats (part_stats.json) and the parts catalog (parts.json). Radar stats are for the spider chart; THESE numbers drive the simulation. Keeping them apart means you can tune battle balance without touching display data.",
+    "how_to_expand": "Add an entry under the matching class map (blades/ratchets/bits) keyed by release code. Any field you omit falls back to the class default in `defaults`. Add a new gimmick by giving a part a `gimmick` id and implementing that id in the engine's gimmick registry.",
+    "key": "Entries are keyed by release code (e.g. 'BX-01'). If two parts share a code, suffix with the base name: 'BX-46:Cobalt Drake'.",
+    "units": "mass in grams, lengths in mm, angles in degrees, time in seconds, angularVelocity in rad/s. The engine normalizes to its own world units on load."
+  },
+
+  "defaults": {
+    "blade": {
+      "mass": 30.0,
+      "radius": 22.0,
+      "attack": 30,
+      "elasticity": 0.55,
+      "spinDir": "right"
+    },
+    "ratchet": {
+      "mass": 8.0,
+      "protrusions": 3,
+      "heightMm": 60,
+      "burstResistanceBias": 0.0
+    },
+    "bit": {
+      "movementStyle": "balance",
+      "friction": 0.5,
+      "elasticity": 0.5,
+      "maneuverability": 0.5,
+      "returnToCenter": 0.5,
+      "gimmick": null
+    }
+  },
+
+  "notes_on_fields": {
+    "blade.attack": "Higher = more HP drained from the opponent per hit and more knockback dealt.",
+    "blade.elasticity": "0..1 restitution. Low = absorbs impact (defense-ish), high = bounces away hard (aggressive/erratic).",
+    "blade.spinDir": "'right' or 'left'. Opposite-spin collisions transfer more energy (canonical Beyblade behavior).",
+    "ratchet.protrusions": "The N in e.g. '9-60'. More protrusions => higher burst resistance and LOWER chance to return from a corner pocket.",
+    "ratchet.heightMm": "The mm in e.g. '9-60'. LOWER height => higher burst resistance (per user's rule). Exceptions handled via override.",
+    "ratchet.burstResistanceBias": "Manual +/- nudge for exceptions like CX-07 that don't follow the protrusions/height rule.",
+    "bit.movementStyle": "'attack' | 'balance' | 'stamina' | 'defense'. Drives the target behavior (see engine).",
+    "bit.friction": "Contact friction with the floor. Higher = sheds speed & HP faster but more stable.",
+    "bit.maneuverability": "How much the bit wanders/drifts. attack high, defense ~0.",
+    "bit.returnToCenter": "Tendency to settle at stadium center (entropy). stamina/defense high, attack low.",
+    "bit.gimmick": "Optional id resolved by the engine's gimmick registry (e.g. 'spin_decay_shift')."
+  },
+
+  "blades": {
+    "BX-01": { "mass": 31, "radius": 23, "attack": 55, "elasticity": 0.62, "spinDir": "right" },
+    "BX-17": { "mass": 30, "radius": 22, "attack": 55, "elasticity": 0.60, "spinDir": "right" }
+  },
+
+  "ratchets": {
+    "BX-01": { "protrusions": 3, "heightMm": 60 },
+    "CX-07": { "protrusions": 0, "heightMm": 0, "burstResistanceBias": 0.4, "integrated": true }
+  },
+
+  "bits": {
+    "BX-01": { "movementStyle": "attack",  "friction": 0.35, "elasticity": 0.65, "maneuverability": 0.9, "returnToCenter": 0.1 },
+    "BX-05": { "movementStyle": "stamina", "friction": 0.30, "elasticity": 0.40, "maneuverability": 0.15, "returnToCenter": 0.85 },
+    "BX-06": { "movementStyle": "defense", "friction": 0.60, "elasticity": 0.30, "maneuverability": 0.05, "returnToCenter": 0.9 },
+    "CX-07": {
+      "movementStyle": "stamina",
+      "friction": 0.4,
+      "elasticity": 0.5,
+      "maneuverability": 0.4,
+      "returnToCenter": 0.6,
+      "gimmick": "spin_decay_shift",
+      "gimmickParams": {
+        "shiftAtHpFraction": 0.4,
+        "toStyle": "attack",
+        "note": "Stamina-first; when spin (HP) drops below 40% it behaves like an attack type."
+      }
+    }
+  }
+}
