@@ -796,7 +796,51 @@ export const projects: ProjectConfig[] = [
       androidPermission: false
     }
   },
+  {
+    slug: "bey-x-rank",
+    name: "Bey X Tournament",
+    tagline: "A comprehensive tournament manager, bracket generator, and persistent ranking system for Beyblade X competitive play.",
+    year: "2026",
+    platform: "Web",
+    status: "In Development",
+    tech: ["Flutter", "Dart", "Web", "Supabase"],
+    label: "Web App · 2026",
+    appIconPath: "assets.icons.projectBeyXBuilder", // Update this icon path if you have a new one
 
+    about: [
+      "A Flutter web app designed specifically for Beyblade X organizers and communities to manage tournaments and track player rankings. Built to handle everything from casual local meetups to large-scale competitive events, it streamlines the friction of running physical tournaments.",
+      "Modes include multiple tournament formats (Swiss, Single/Double Elimination, and Round Robin), live bracket generation with automated byes, and a persistent leaderboard system that calculates player rankings (Elo-based) over time. Built with BLoC state management and Clean Architecture to ensure rock-solid performance during live events.",
+      "Organizers can run events from a single device, or allow players to view live brackets, upcoming matchups, and personal match histories directly from their own phones in real-time."
+    ],
+
+    features: [
+      "Multiple bracket formats: Swiss, Single/Double Elimination, and Round Robin",
+      "Automated seeding, matchmaking, and bye distribution",
+      "Live interactive brackets that spectators and players can view in real-time",
+      "Persistent player profiles with Elo-based ranking leaderboards",
+      "Detailed match history logging and head-to-head statistics",
+      "Save/resume functionality and one-click image export for social media",
+      "Mobile-optimized dashboard designed for on-the-go tournament organizers"
+    ],
+
+    stackNotes: [
+      "Flutter web with BLoC/Cubit state management",
+      "Clean Architecture per feature (domain / data / presentation)",
+      "Supabase PostgreSQL and Realtime for live bracket syncing across devices",
+      "Supabase Edge Functions for secure, server-side Elo/ranking calculations"
+    ],
+
+    build: { web: '/builds/bey-x-rank/index.html' },
+    storeNote: "Public build, in active development.",
+    legalNote: "Account required for tournament organizers. Player profiles and match results are stored publicly on the leaderboard. No sensitive personal data is collected.",
+
+    privacy: {
+      updated: "August 15, 2026",
+      contact: "info@stateless-labs.com",
+      collectsData: true, // Changed to true since it likely stores player names/rankings
+      androidPermission: false
+    }
+  },
   {
     slug: 'project-vault',
     name: 'Project Vault',
