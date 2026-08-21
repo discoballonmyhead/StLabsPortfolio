@@ -2830,6 +2830,10 @@ url_launcher_web
 url_launcher_windows
 vector_graphics
 vector_graphics_compiler
+video_player
+video_player_android
+video_player_avfoundation
+video_player_platform_interface
 
 Copyright 2013 The Flutter Authors
 
@@ -7418,6 +7422,7 @@ shared_preferences_windows
 url_launcher
 url_launcher_platform_interface
 vector_graphics_codec
+video_player_web
 xdg_directories
 
 Copyright 2013 The Flutter Authors. All rights reserved.
