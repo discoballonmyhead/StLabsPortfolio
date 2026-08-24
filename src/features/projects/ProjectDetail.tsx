@@ -37,6 +37,9 @@
  *
  *      build: { web: '/builds/bey-builder-x/' }
  *
+ *  A trailing slash is rewritten to the index.html inside that folder, because
+ *  Vite's dev server will not do it for you. See normaliseInternal below.
+ *
  * ─── SITE CONFIG FIELDS READ BY THIS PAGE ────────────────────────────────────
  *
  *   name, tagline, label, status, tech          header
@@ -51,10 +54,9 @@
  *
  *  Internal, Internal Testing, and Restricted projects publish no links at all.
  */
-
 import type { CSSProperties, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { Layout, Breadcrumb, SectionLabel, AppHeader, FadeUp } from '@/components'
+import { Layout, Breadcrumb, SectionLabel, FadeUp } from '@/components'
 import ImageCarousel from '@/components/ImageCarousel'
 import { projects } from '@/config'
 import type { ProjectStatus, ProjectVisibility } from '@/config'
@@ -69,6 +71,7 @@ const ACCENT_WARM = '#FFA070'
 const DANGER = '#E5644E'
 
 const HIDES_LINKS = new Set<ProjectVisibility>(['Internal', 'Internal Testing', 'Restricted'])
+const TERMINAL_STATUSES = new Set<ProjectStatus>(['Dead', 'Defunct', 'Abandoned', 'Discontinued'])
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Link model
@@ -77,11 +80,14 @@ const HIDES_LINKS = new Set<ProjectVisibility>(['Internal', 'Internal Testing', 
 interface OutLink {
   label: string
   href: string
-  /** Lives inside this site, served from public/. Gets a launch glyph. */
   internal: boolean
 }
 
-/** Real link, or still a placeholder someone forgot to fill in. */
+function normaliseInternal(href: string): string {
+  if (!href.startsWith('/')) return href
+  return href.endsWith('/') ? `${href}index.html` : href
+}
+
 function isRealHref(href?: string): href is string {
   if (!href) return false
   const h = href.trim()
@@ -97,10 +103,10 @@ function collectLinks(p: (typeof projects)[number]): { links: OutLink[]; configu
   const push = (label: string, href?: string) => {
     if (href !== undefined) configured = true
     if (!isRealHref(href)) return
-    links.push({ label, href, internal: href.startsWith('/') })
+    const internal = href.startsWith('/')
+    links.push({ label, href: internal ? normaliseInternal(href) : href, internal })
   }
 
-  // Direct builds first. If it can simply be opened, that is the fastest way in.
   push('Launch build', p.build?.web)
   push('Play on itch.io', p.build?.itch)
   push('Download APK', p.build?.apk)
@@ -111,7 +117,6 @@ function collectLinks(p: (typeof projects)[number]): { links: OutLink[]; configu
   push('Source on GitHub', p.build?.github)
   p.build?.other?.forEach(o => push(o.label, o.href))
 
-  // Then the store listings.
   push('Get it on Google Play', p.stores?.googlePlay)
   push('Download on the App Store', p.stores?.appStore)
   push('Open the web app', p.stores?.web)
@@ -121,7 +126,7 @@ function collectLinks(p: (typeof projects)[number]): { links: OutLink[]; configu
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Icons
+// Icons & Graphics
 // ─────────────────────────────────────────────────────────────────────────────
 
 const IconExternal = ({ size = 12 }: { size?: number }) => (
@@ -137,14 +142,7 @@ const IconLaunch = ({ size = 12 }: { size?: number }) => (
   </svg>
 )
 
-const IconShield = ({ size = 13 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M12 3l7 3v6c0 4.4-3 8-7 9-4-1-7-4.6-7-9V6z" />
-  </svg>
-)
-
-const IconTrash = ({ size = 13 }: { size?: number }) => (
+const IconTrash = ({ size = 14 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
     strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M4 6h16" /><path d="M9 6V4h6v2" /><path d="M6 6l1 14h10l1-14" />
@@ -219,16 +217,7 @@ function MetaRow({ label, value, last = false }: { label: string; value: ReactNo
   )
 }
 
-/** One outbound link. Filled for the primary action, outlined for the rest. */
-function ActionLink({
-  link,
-  primary = false,
-  large = false,
-}: {
-  link: OutLink
-  primary?: boolean
-  large?: boolean
-}) {
+function ActionLink({ link, primary = false, large = false }: { link: OutLink; primary?: boolean; large?: boolean }) {
   const style: CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
@@ -284,127 +273,57 @@ function ActionLink({
   )
 }
 
-/**
- * Internal navigation row. Given real breathing room, an icon plate, and a
- * one line hint, so privacy and account deletion never read as one blurred
- * pair of links stacked on top of each other.
- */
-function NavRow({
-  to,
-  label,
-  hint,
-  icon,
-  danger = false,
-}: {
-  to: string
-  label: string
-  hint: string
-  icon: ReactNode
-  danger?: boolean
-}) {
-  const hoverColor = danger ? DANGER : ACCENT
-
-  return (
-    <Link
-      to={to}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '12px',
-        margin: '0 -12px',
-        borderRadius: '9px',
-        textDecoration: 'none',
-        transition: 'background 0.15s',
-      }}
-      onMouseEnter={e => {
-        const el = e.currentTarget
-        el.style.background = danger ? 'rgba(229,100,78,0.07)' : 'rgba(255,255,255,0.032)'
-        el.querySelectorAll<HTMLElement>('[data-tint]').forEach(n => { n.style.color = hoverColor })
-      }}
-      onMouseLeave={e => {
-        const el = e.currentTarget
-        el.style.background = 'transparent'
-        el.querySelectorAll<HTMLElement>('[data-tint]').forEach(n => {
-          n.style.color = n.dataset.tint === 'strong'
-            ? 'var(--text, #f2f2f2)'
-            : 'var(--text-faint, #6a6a6a)'
-        })
-      }}
-    >
-      <span
-        data-tint="soft"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '30px',
-          height: '30px',
-          flexShrink: 0,
-          borderRadius: '8px',
-          border: '1px solid var(--border-strong, #1a1a1a)',
-          color: 'var(--text-faint, #6a6a6a)',
-          transition: 'color 0.15s',
-        }}
-      >
-        {icon}
-      </span>
-
-      <span style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, flex: 1 }}>
-        <span
-          data-tint="strong"
-          style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--text, #f2f2f2)', transition: 'color 0.15s' }}
-        >
-          {label}
-        </span>
-        <span style={{ fontSize: '11px', color: 'var(--text-ghost, #4e4e4e)', lineHeight: 1.45 }}>
-          {hint}
-        </span>
-      </span>
-
-      <span
-        data-tint="soft"
-        style={{ color: 'var(--text-faint, #6a6a6a)', flexShrink: 0, transition: 'color 0.15s' }}
-        aria-hidden="true"
-      >
-        &rarr;
-      </span>
-    </Link>
-  )
-}
-
 function BulletList({ items, marker }: { items: string[]; marker: 'check' | 'dash' }) {
   return (
-    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px', margin: 0, padding: 0 }}>
+    <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px', margin: 0, padding: 0 }}>
       {items.map(item => (
         <li
           key={item}
           style={{
-            fontSize: '14px',
-            color: 'var(--text-muted, #8a8a8a)',
-            lineHeight: 1.65,
-            paddingLeft: '24px',
-            position: 'relative',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+            fontSize: '14.5px',
+            color: 'var(--text-muted, #a3a3a3)',
+            lineHeight: 1.7,
           }}
         >
-          <span style={{ position: 'absolute', left: 0, top: '3px', lineHeight: 1 }} aria-hidden="true">
+          <span
+            style={{
+              marginTop: '3px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              width: marker === 'check' ? '20px' : '16px',
+              height: marker === 'check' ? '20px' : '16px',
+              borderRadius: marker === 'check' ? '50%' : '0',
+              background: marker === 'check' ? 'rgba(255, 140, 85, 0.12)' : 'transparent',
+            }}
+            aria-hidden="true"
+          >
             {marker === 'check' ? (
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={ACCENT}
-                strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.8 }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={ACCENT}
+                strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             ) : (
-              <span style={{ display: 'inline-block', width: '11px', height: '1px', background: 'var(--border-light, #2a2a2a)', marginTop: '7px' }} />
+              <span style={{
+                display: 'inline-block',
+                width: '10px',
+                height: '2px',
+                borderRadius: '2px',
+                background: 'var(--border-strong, #3f3f46)'
+              }} />
             )}
           </span>
-          {item}
+          <span style={{ flex: 1, letterSpacing: '0.01em' }}>{item}</span>
         </li>
       ))}
     </ul>
   )
 }
 
-/** Used when a build exists in config but has no real URL yet. */
 function PendingPill({ children }: { children: ReactNode }) {
   return (
     <span
@@ -432,6 +351,200 @@ function PendingPill({ children }: { children: ReactNode }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Graveyard Banner
+// ─────────────────────────────────────────────────────────────────────────────
+
+function TerminalStatusBanner({ status }: { status: string }) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px',
+        padding: '20px 24px',
+        background: 'rgba(255, 255, 255, 0.02)',
+        border: '1px solid var(--border-light, #2a2a2a)',
+        borderRadius: '12px',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          width: '48px',
+          height: '48px',
+          borderRadius: '12px',
+          background: 'var(--surface, #0a0a0a)',
+          border: '1px solid var(--border-strong, #1a1a1a)',
+          color: 'var(--text-ghost, #4e4e4e)',
+        }}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 10h.01M15 10h.01" />
+          <path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z" />
+        </svg>
+      </div>
+
+      <div>
+        <h4 style={{ margin: '0 0 4px', fontSize: '14.5px', fontWeight: 600, color: 'var(--text, #f2f2f2)' }}>
+          This project is {status.toLowerCase()}.
+        </h4>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-faint, #6a6a6a)', lineHeight: 1.6 }}>
+          It has reached the end of its active lifecycle and is no longer maintained. Links and downloads are provided purely for archival purposes and may no longer function.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Header & Badge Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+function getStatusColors(status: string) {
+  if (['Live', 'Beta'].includes(status)) return { bg: 'rgba(61, 220, 132, 0.15)', text: '#3DDC84', border: 'rgba(61, 220, 132, 0.3)' }
+  if (TERMINAL_STATUSES.has(status as ProjectStatus)) return { bg: 'rgba(229, 100, 78, 0.15)', text: DANGER, border: 'rgba(229, 100, 78, 0.3)' }
+  return { bg: 'rgba(255, 140, 85, 0.15)', text: ACCENT, border: 'rgba(255, 140, 85, 0.3)' }
+}
+
+function CustomProjectHeader({ p, isMobile }: { p: (typeof projects)[number]; isMobile: boolean }) {
+  const statusTheme = getStatusColors(p.status)
+  const isPublic = !p.visibility || p.visibility === 'Public'
+
+  // Use the path exactly as provided in the config
+  const iconSrc = p.appIconPath
+
+  return (
+    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '24px', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: '12px' }}>
+
+      {/* Icon Area with Badges */}
+      <div style={{ position: 'relative', flexShrink: 0 }}>
+
+        {/* The Icon Box */}
+        <div style={{
+          width: '96px', height: '96px',
+          borderRadius: '22px',
+          background: 'var(--surface, #1a1a1a)',
+          border: '1px solid var(--border-strong, #2a2a2a)',
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          {iconSrc ? (
+            <img src={iconSrc} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(to bottom right, #2a2a2a, #1a1a1a)' }} />
+          )}
+        </div>
+
+        {/* Top-Right Badge: Status */}
+        <div style={{
+          position: 'absolute', top: '-8px', right: '-16px', zIndex: 10,
+          background: statusTheme.bg, color: statusTheme.text, border: `1px solid ${statusTheme.border}`,
+          padding: '4px 10px', borderRadius: '100px', fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.04em',
+          textTransform: 'uppercase', backdropFilter: 'blur(8px)'
+        }}>
+          {p.status}
+        </div>
+
+        {/* Bottom-Right Badge: Access */}
+        {!isPublic && (
+          <div style={{
+            position: 'absolute', bottom: '-8px', right: '-16px', zIndex: 10,
+            background: 'rgba(168, 85, 247, 0.15)', color: '#C084FC', border: '1px solid rgba(168, 85, 247, 0.3)',
+            padding: '4px 10px', borderRadius: '100px', fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.04em',
+            textTransform: 'uppercase', backdropFilter: 'blur(8px)'
+          }}>
+            {p.visibility}
+          </div>
+        )}
+      </div>
+
+      {/* Title & Tagline Area */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <h1 style={{ margin: 0, fontSize: '28px', color: '#fff', letterSpacing: '-0.02em', fontWeight: 700 }}>
+          {p.name}
+        </h1>
+        <p style={{ margin: 0, fontSize: '15px', color: 'var(--text-muted, #8a8a8a)', lineHeight: 1.5, maxWidth: '600px' }}>
+          {p.tagline}
+        </p>
+
+        {/* Tech Stack Chips */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+          {p.tech.map(t => (
+            <span key={t} style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '100px', background: 'rgba(255,255,255,0.04)', color: '#a3a3a3', border: '1px solid rgba(255,255,255,0.05)' }}>
+              {t}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Legal Footer
+// ─────────────────────────────────────────────────────────────────────────────
+
+function LegalFooter({ p, basePath }: { p: (typeof projects)[number]; basePath: string }) {
+  const linkStyle = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '13px',
+    color: 'var(--text-muted, #8a8a8a)',
+    textDecoration: 'none',
+    transition: 'color 0.15s',
+  }
+
+  return (
+    <div
+      style={{
+        marginTop: '24px',
+        paddingTop: '32px',
+        borderTop: '1px solid var(--border-faint, #141414)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+      }}
+    >
+      {p.legalNote && (
+        <p style={{ fontSize: '13px', color: 'var(--text-faint, #6a6a6a)', lineHeight: 1.7, margin: 0, maxWidth: '800px' }}>
+          {p.legalNote}
+        </p>
+      )}
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center' }}>
+        <Link to={`${basePath}/terms`} style={linkStyle} onMouseEnter={e => e.currentTarget.style.color = 'var(--text, #f2f2f2)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted, #8a8a8a)'}>
+          Terms of Service
+        </Link>
+        <Link to={`${basePath}/privacy-policy`} style={linkStyle} onMouseEnter={e => e.currentTarget.style.color = 'var(--text, #f2f2f2)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted, #8a8a8a)'}>
+          Privacy Policy
+        </Link>
+        <Link to={`${basePath}/cookies`} style={linkStyle} onMouseEnter={e => e.currentTarget.style.color = 'var(--text, #f2f2f2)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted, #8a8a8a)'}>
+          Cookie Policy
+        </Link>
+        <Link
+          to={`${basePath}/delete-account`}
+          style={{
+            ...linkStyle, marginLeft: 'auto', color: DANGER, background: 'rgba(229, 100, 78, 0.08)',
+            padding: '8px 16px', borderRadius: '100px', fontWeight: 500, transition: 'background 0.15s, transform 0.15s'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(229, 100, 78, 0.15)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(229, 100, 78, 0.08)'; e.currentTarget.style.transform = 'translateY(0)' }}
+        >
+          <IconTrash size={14} />
+          Delete account and data
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Page
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -445,54 +558,45 @@ export default function ProjectDetail({ slug }: Props) {
 
   const visibility = p.visibility
   const linksHidden = !!visibility && HIDES_LINKS.has(visibility)
+  const isTerminal = TERMINAL_STATUSES.has(p.status as ProjectStatus)
 
   const { links, configured } = collectLinks(p)
+
   const visibleLinks = linksHidden ? [] : links
   const primary = visibleLinks[0]
   const rest = visibleLinks.slice(1)
-
-  // Something was configured but every href is still a placeholder.
   const pending = !linksHidden && configured && visibleLinks.length === 0
 
   return (
     <Layout>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '36px' }}>
 
-        <Breadcrumb
-          items={[
-            { label: 'Home', path: '/' },
-            { label: 'Projects', path: '/projects' },
-            { label: p.name },
-          ]}
-        />
+        <Breadcrumb items={[{ label: 'Home', path: '/' }, { label: 'Projects', path: '/projects' }, { label: p.name }]} />
 
-        <AppHeader
-          label={p.label}
-          title={p.name}
-          tagline={p.tagline}
-          tags={[p.status, ...p.tech]}
-          statusTag={p.status as ProjectStatus}
-        />
+        {/* ── Custom Dual-Badge Header ── */}
+        <CustomProjectHeader p={p} isMobile={isMobile} />
+
+        {/* ── Terminal Animation Banner ── */}
+        {isTerminal && (
+          <FadeUp delay={0.02}>
+            <TerminalStatusBanner status={p.status} />
+          </FadeUp>
+        )}
 
         {/* ── Launch bar ── */}
         {(primary || pending || linksHidden) && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
             {primary && <ActionLink link={primary} primary large />}
-
             {primary && primary.internal && (
               <span style={{ fontSize: '11.5px', color: 'var(--text-ghost, #4e4e4e)' }}>
                 Runs right here, nothing to install.
               </span>
             )}
-
             {rest.length > 0 && (
               <span style={{ fontSize: '11.5px', color: 'var(--text-ghost, #4e4e4e)' }}>
-                {rest.length === 1
-                  ? 'One other way to get it, listed below.'
-                  : `${rest.length} other ways to get it, listed below.`}
+                {rest.length === 1 ? 'One other way to get it, listed below.' : `${rest.length} other ways to get it, listed below.`}
               </span>
             )}
-
             {pending && <PendingPill>Build is not published yet</PendingPill>}
             {linksHidden && <PendingPill>{visibility} project, links are not published</PendingPill>}
           </div>
@@ -500,11 +604,7 @@ export default function ProjectDetail({ slug }: Props) {
 
         {hasMedia && (
           <FadeUp>
-            <ImageCarousel
-              coverImage={p.coverImage}
-              screenshots={p.screenshots}
-              projectName={p.name}
-            />
+            <ImageCarousel coverImage={p.coverImage} screenshots={p.screenshots} projectName={p.name} />
           </FadeUp>
         )}
 
@@ -519,17 +619,13 @@ export default function ProjectDetail({ slug }: Props) {
             paddingTop: 'clamp(28px, 4vw, 44px)',
           }}
         >
-
           {/* Main column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', minWidth: 0 }}>
-
             <FadeUp>
               <section>
                 <SectionLabel>About</SectionLabel>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '4px' }}>
-                  {p.about.map((para, i) => (
-                    <p key={i} style={bodyText}>{para}</p>
-                  ))}
+                  {p.about.map((para, i) => <p key={i} style={bodyText}>{para}</p>)}
                 </div>
               </section>
             </FadeUp>
@@ -538,9 +634,7 @@ export default function ProjectDetail({ slug }: Props) {
               <FadeUp delay={0.05}>
                 <section>
                   <SectionLabel>Features</SectionLabel>
-                  <div style={{ marginTop: '4px' }}>
-                    <BulletList items={p.features} marker="check" />
-                  </div>
+                  <div style={{ marginTop: '4px' }}><BulletList items={p.features} marker="check" /></div>
                 </section>
               </FadeUp>
             )}
@@ -549,9 +643,7 @@ export default function ProjectDetail({ slug }: Props) {
               <FadeUp delay={0.08}>
                 <section>
                   <SectionLabel>Stack</SectionLabel>
-                  <div style={{ marginTop: '4px' }}>
-                    <BulletList items={p.stackNotes} marker="dash" />
-                  </div>
+                  <div style={{ marginTop: '4px' }}><BulletList items={p.stackNotes} marker="dash" /></div>
                 </section>
               </FadeUp>
             )}
@@ -568,21 +660,14 @@ export default function ProjectDetail({ slug }: Props) {
               minWidth: 0,
             }}
           >
-
             <FadeUp>
               <Card title="Details">
                 <MetaRow label="Platform" value={p.platform} />
                 <MetaRow label="Year" value={p.year} />
-                <MetaRow
-                  label="Status"
-                  value={p.status}
-                  last={!visibility || visibility === 'Public'}
-                />
-                {visibility && visibility !== 'Public' && (
-                  <MetaRow label="Access" value={<span style={{ color: ACCENT }}>{visibility}</span>} last />
-                )}
+                <MetaRow label="Status" value={p.status} last={!visibility || visibility === 'Public'} />
+                {visibility && visibility !== 'Public' && <MetaRow label="Access" value={<span style={{ color: ACCENT }}>{visibility}</span>} last />}
                 <p style={{ fontSize: '11px', color: 'var(--text-ghost, #4e4e4e)', margin: '12px 0 0' }}>
-                  Last reviewed {p.privacy.updated}
+                  Last reviewed {p.privacy?.updated || 'recently'}
                 </p>
               </Card>
             </FadeUp>
@@ -596,15 +681,9 @@ export default function ProjectDetail({ slug }: Props) {
                     </p>
                   ) : visibleLinks.length > 0 ? (
                     <>
-                      {(p.buildNote || p.storeNote) && (
-                        <p style={{ fontSize: '12px', color: 'var(--text-faint, #6a6a6a)', lineHeight: 1.65, margin: '0 0 12px' }}>
-                          {p.buildNote ?? p.storeNote}
-                        </p>
-                      )}
+                      {(p.buildNote || p.storeNote) && <p style={{ fontSize: '12px', color: 'var(--text-faint, #6a6a6a)', lineHeight: 1.65, margin: '0 0 12px' }}>{p.buildNote ?? p.storeNote}</p>}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {visibleLinks.map((link, i) => (
-                          <ActionLink key={link.href + i} link={link} primary={i === 0} />
-                        ))}
+                        {visibleLinks.map((link, i) => <ActionLink key={link.href + i} link={link} primary={i === 0} />)}
                       </div>
                     </>
                   ) : (
@@ -615,43 +694,13 @@ export default function ProjectDetail({ slug }: Props) {
                 </Card>
               </FadeUp>
             )}
-
-            <FadeUp delay={0.08}>
-              <Card title="Legal">
-                {p.legalNote && (
-                  <p
-                    style={{
-                      fontSize: '12px',
-                      color: 'var(--text-faint, #6a6a6a)',
-                      lineHeight: 1.7,
-                      margin: '0 0 14px',
-                      paddingBottom: '14px',
-                      borderBottom: '1px solid var(--border-faint, #141414)',
-                    }}
-                  >
-                    {p.legalNote}
-                  </p>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <NavRow
-                    to={`${basePath}/privacy-policy`}
-                    label="Privacy policy"
-                    hint="What is collected, and what is not"
-                    icon={<IconShield />}
-                  />
-                  <NavRow
-                    to={`${basePath}/delete-account`}
-                    label="Delete account and data"
-                    hint="Permanent, processed within 30 days"
-                    icon={<IconTrash />}
-                    danger
-                  />
-                </div>
-              </Card>
-            </FadeUp>
-
           </aside>
         </div>
+
+        <FadeUp delay={0.12}>
+          <LegalFooter p={p} basePath={basePath} />
+        </FadeUp>
+
       </div>
     </Layout>
   )

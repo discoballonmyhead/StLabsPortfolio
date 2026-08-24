@@ -59,7 +59,7 @@ export const assets = {
   // Per project app icons. Add a key here, then point a project's
   // appIconPath at it, for example: appIconPath: assets.icons.projectKin
   icons: {
-    projectBeyXBuilder: '/icons/bey-builder-x.png',
+    ClasherST: '/icons/clasherst.png',
     projectBlinkoAdmin: '/icons/blinko-admin.png',
     projectVault: '/icons/project-vault.png',
     projectKin: '/icons/project-kin.png',
@@ -157,8 +157,87 @@ export const leadership = Object.assign(
 // 3. Paste the deployed URL below
 
 export const deletionConfig = {
-  scriptUrl: 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec',
+  scriptUrl: 'https://script.google.com/macros/s/AKfycbwamrZaND0uXaaVkEHr4meTsc6t6DE2M4Rm-WiIIhm7jXeflvAwekRcj_gRRFjGkG6gSw/exec',
 } as const
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STANDALONE DELETION PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+// One address that covers every app, at /delete-account. The visitor picks the
+// app from a dropdown instead of arriving on a per project URL.
+//
+// Both forms exist and both are useful. Per project pages, at
+// /projects/<slug>/delete-account, are what you paste into a Play Store or App
+// Store listing, because the store wants a URL specific to that app. This one
+// is what you put in a footer, a support reply, or an email signature, where
+// the person may not know or care which of your apps they are dealing with.
+//
+// Both POST to the same Apps Script endpoint in deletionConfig above and land
+// in the same sheet, so there is one place to work through requests.
+
+export interface StandaloneDeletionConfig {
+  show: boolean
+  /** Route for the page. Change it and the router follows. */
+  path: string
+  /** Adds a link to the top nav. Off by default, it is not a browsing page. */
+  showInNav: boolean
+  navLabel: string
+
+  eyebrow: string
+  heading: string
+  subtext: string
+
+  appLabel: string
+  appPlaceholder: string
+  identifierLabel: string
+  identifierHint: string
+  reasonLabel: string
+  reasonPlaceholder: string
+  confirmText: string
+  submitLabel: string
+
+  successHeading: string
+  successBody: string
+  /** Used in the warning notice and the success copy. */
+  processingDays: number
+
+  /**
+   * Restrict the dropdown to these slugs. Omit and every project appears
+   * except classified ones, whose existence is not advertised.
+   */
+  includeSlugs?: string[]
+  /** Extra option for someone who cannot find their app in the list. */
+  allowOther: boolean
+  otherLabel: string
+}
+
+export const standaloneDeletion: StandaloneDeletionConfig = {
+  show: true,
+  path: '/delete-account',
+  showInNav: false,
+  navLabel: 'Delete account',
+
+  eyebrow: 'Stateless Labs',
+  heading: 'Delete your account',
+  subtext: 'Pick the app, tell us how to find you, and the account and everything attached to it gets removed. No sign in required, and you do not have to explain yourself.',
+
+  appLabel: 'Which app?',
+  appPlaceholder: 'Choose an app',
+  identifierLabel: 'Email address',
+  identifierHint: 'Use the address you signed up with, otherwise the account cannot be matched.',
+  reasonLabel: 'Reason for leaving',
+  reasonPlaceholder: 'Optional. Genuinely useful if something went wrong.',
+  confirmText: 'I understand this is permanent and that the data cannot be recovered afterwards.',
+  submitLabel: 'Submit deletion request',
+
+  successHeading: 'Request received',
+  successBody: 'It is in the queue. The account and its data are removed within 30 days, and you get a confirmation at the address you gave.',
+  processingDays: 30,
+
+  allowOther: true,
+  otherLabel: 'My app is not listed',
+}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // NAVIGATION
@@ -584,6 +663,7 @@ export type ProjectVisibility =
 
 export type Platform = 'Mobile' | 'Web' | 'Desktop' | 'Cross-platform' | 'Internal'
 
+
 // ─────────────────────────────────────────────────────────────────────────────
 // PRIVACY TYPES
 // ─────────────────────────────────────────────────────────────────────────────
@@ -603,6 +683,73 @@ export interface PrivacyConfig {
   dataCollected?: string[]
   internetAccess?: string
   localStorageNote?: string
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TERMS OF SERVICE
+// ─────────────────────────────────────────────────────────────────────────────
+// The terms page is generated from flags rather than pasted prose, so every app
+// gets a consistent document and you only describe what is actually true of it.
+// Leave `terms` off a project entirely and the page still renders using
+// legalDefaults below, which is the right answer for a small offline tool.
+//
+// This is a starting point written in plain language, not legal advice. If real
+// money, real user data, or real risk is involved, have a lawyer read it.
+
+export interface TermsClause {
+  title: string
+  body: string[]
+}
+
+export interface TermsConfig {
+  updated: string
+  contact: string
+  /** Replaces the generic opening paragraph. */
+  summaryOverride?: string
+  /** Minimum age in years. Omit or set 0 to drop the clause entirely. */
+  minimumAge?: number
+  /** Adds the account clause: your credentials, your responsibility. */
+  hasAccounts?: boolean
+  /** Adds the payments clause: charges, refunds, subscriptions. */
+  hasPayments?: boolean
+  /** Adds the user content clause: what you post, what licence we need. */
+  hasUserContent?: boolean
+  /** Jurisdiction, for example 'England and Wales'. Omit to drop the clause. */
+  governingLaw?: string
+  /** Fully custom clauses appended after the generated ones. */
+  extraClauses?: TermsClause[]
+}
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COOKIES
+// ─────────────────────────────────────────────────────────────────────────────
+// Set usesCookies false and the page becomes a short honest statement that the
+// app sets none, which is the case for most of these. Browser storage that is
+// not a cookie still gets disclosed through localStorageUse, because visitors
+// care about the behaviour, not the technical name for it.
+
+export type CookieCategory = 'essential' | 'functional' | 'analytics' | 'advertising'
+
+export interface CookieEntry {
+  name: string
+  provider: string
+  purpose: string
+  duration: string
+  category: CookieCategory
+}
+
+export interface CookieConfig {
+  updated: string
+  contact: string
+  usesCookies: boolean
+  summaryOverride?: string
+  cookies?: CookieEntry[]
+  /** Local storage, session storage, IndexedDB. Not cookies, still disclosed. */
+  localStorageUse?: string[]
+  /** Anyone else who can set a cookie through this app. */
+  thirdParties?: { name: string; purpose: string; policyUrl?: string }[]
 }
 
 // Official app store listings. These are the "install it properly" links.
@@ -634,9 +781,6 @@ export interface BuildLinks {
   other?: { label: string; href: string }[]
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PROJECT SHAPE
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface ProjectConfig {
   slug: string
@@ -657,10 +801,20 @@ export interface ProjectConfig {
   buildNote?: string
   legalNote?: string
   privacy: PrivacyConfig
+  terms?: TermsConfig    // omit and the page uses legalDefaults
+  cookies?: CookieConfig   // omit and the page says no cookies are set
+
+  /**
+   * Per project accent for the hosted status pages, so a confirmation screen
+   * looks like the app that sent you there rather than like this site. Falls
+   * back to the colour on the status page type when omitted.
+   */
+  theme?: { accent?: string; bg?: string }
 
   appIconPath?: string    // point at assets.icons.<key>
   hasAuthPages?: boolean
   hasEmailConfirmation?: boolean
+  hasPasswordReset?: boolean
 
   // Media, paths under /public/screenshots/<slug>/
   coverImage?: string             // 16:9 hero thumbnail on the card
@@ -676,6 +830,28 @@ export interface ProjectConfig {
     extraNote?: string       // shown below the identifier field
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LEGAL DEFAULTS
+// ─────────────────────────────────────────────────────────────────────────────
+// Fallbacks used by the terms and cookie pages when a project does not define
+// its own block. Change these once and every project without an override
+// follows. `updated` is the date you last reviewed this wording.
+
+export const legalDefaults = {
+  updated: 'August 1, 2026',
+  contact: brand.email,
+  governingLaw: 'US and EU',
+  minimumAge: 13,
+
+  /** Opening line of a terms page with no override. */
+  termsSummary:
+    'These are the terms you agree to by using this app. They are written to be read, not to be skipped, so they are short and in plain language.',
+
+  /** Opening line of a cookie page for an app that sets none. */
+  noCookiesSummary:
+    'This app does not set cookies and does not use them to track you across the web.',
+} as const
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PROJECTS
@@ -797,15 +973,16 @@ export const projects: ProjectConfig[] = [
     }
   },
   {
-    slug: "bey-x-rank",
-    name: "Bey X Tournament",
+    slug: "clasher-st",
+    name: "Clasher ST",
     tagline: "A comprehensive tournament manager, bracket generator, and persistent ranking system for Beyblade X competitive play.",
     year: "2026",
     platform: "Web",
     status: "In Development",
     tech: ["Flutter", "Dart", "Web", "Supabase"],
     label: "Web App · 2026",
-    appIconPath: "assets.icons.projectBeyXBuilder", // Update this icon path if you have a new one
+    appIconPath: "/icons/clasherst.png",
+    coverImage: "/icons/clasherst.png",
 
     about: [
       "A Flutter web app designed specifically for Beyblade X organizers and communities to manage tournaments and track player rankings. Built to handle everything from casual local meetups to large-scale competitive events, it streamlines the friction of running physical tournaments.",
@@ -824,21 +1001,64 @@ export const projects: ProjectConfig[] = [
     ],
 
     stackNotes: [
-      "Flutter web with BLoC/Cubit state management",
-      "Clean Architecture per feature (domain / data / presentation)",
-      "Supabase PostgreSQL and Realtime for live bracket syncing across devices",
-      "Supabase Edge Functions for secure, server-side Elo/ranking calculations"
+      "Flutter web frontend",
+      "Real-time database syncing across devices",
+      "Proprietary stack configuration for secure tournament and ranking logic"
     ],
 
-    build: { web: '/builds/bey-x-rank/index.html' },
+    // To add store listings later, uncomment and populate this block:
+    // stores: {
+    //   googlePlay: "https://play.google.com/store/apps/details?id=...",
+    //   appStore: "https://apps.apple.com/app/..."
+    // },
+
+    build: { web: '/builds/clasher-st/index.html' },
     storeNote: "Public build, in active development.",
-    legalNote: "Account required for tournament organizers. Player profiles and match results are stored publicly on the leaderboard. No sensitive personal data is collected.",
+    legalNote: "Accounts are required for organizers and ranked players. We collect basic profile data but zero data for targeted advertising. Account deletion requests are processed within 30 business days.",
 
     privacy: {
-      updated: "August 15, 2026",
+      updated: "August 17, 2026",
       contact: "info@stateless-labs.com",
-      collectsData: true, // Changed to true since it likely stores player names/rankings
-      androidPermission: false
+      collectsData: true,
+      androidPermission: false,
+      summaryOverride: "We only collect the data necessary to run fair tournaments, secure your account, and maintain the global leaderboard. We do not collect, sell, or share any data for targeted advertising.",
+      dataCollected: [
+        "Email address",
+        "Username",
+        "Profile images",
+        "Country of residence",
+        "Core authentication and security logs"
+      ]
+    },
+
+    terms: {
+      updated: "August 17, 2026",
+      contact: "info@stateless-labs.com",
+      hasAccounts: true,
+      extraClauses: [
+        {
+          title: "Competitive Integrity and Account Rules",
+          body: [
+            "Any misconduct intended to manipulate the leaderboard will result in an immediate and permanent ban. This includes intentionally raising your Elo rating through faulty means, match fixing, or exploiting system mechanics.",
+            "Charging real world money for leaderboard placement, as well as buying or selling accounts, is strictly prohibited. If an account is caught participating in these activities, it will be banned permanently. This rule applies equally to verified accounts."
+          ]
+        }
+      ]
+    },
+
+    cookies: {
+      updated: "August 17, 2026",
+      contact: "info@stateless-labs.com",
+      usesCookies: false,
+      summaryOverride: "This app does not use cookies for tracking or targeted advertising.",
+      localStorageUse: [
+        "We only use local browser storage to keep you logged in securely and to save temporary bracket data while you manage a tournament."
+      ]
+    },
+
+    deletion: {
+      identifierLabel: "Email address or username",
+      extraNote: "Upon request, your account and all associated data (including images, profile details, and match history) will be permanently deleted within 30 business days."
     }
   },
   {
@@ -882,7 +1102,7 @@ export const projects: ProjectConfig[] = [
     tagline: 'Social media built to restore your attention span.',
     year: '2025',
     platform: 'Mobile',
-    status: 'In Development',
+    status: 'Archived',
     tech: ['Flutter', 'Dart', 'Supabase'],
     label: 'Mobile App · 2025',
     appIconPath: assets.icons.projectKin,
@@ -944,6 +1164,7 @@ export const projects: ProjectConfig[] = [
 export type StatusPageType =
   | 'auth-success' | 'auth-failed'
   | 'email-sent' | 'email-confirmed' | 'email-failed'
+  | 'reset-sent' | 'reset-success' | 'reset-failed'
 
 export interface StatusPageConfig {
   type: StatusPageType
@@ -1025,7 +1246,49 @@ export const statusPages: Record<StatusPageType, StatusPageConfig> = {
     secondaryCta: { label: 'Back', path: '/' },
     footer: 'ACTION REQUIRED',
   },
+
+  // ── Password reset ────────────────────────────────────────────────────────
+  'reset-sent': {
+    type: 'reset-sent',
+    headline: 'Reset Link\nSent.',
+    accent: '#7c6fcd',
+    bg: '#09080a',
+    statusCode: undefined,
+    statusLabel: 'Sent',
+    body: 'If that address has an account, a reset link is on its way. The link expires in one hour, and asking again invalidates the previous one.',
+    logLines: ['reset token issued', 'message queued', 'expiry set to 60 minutes'],
+    primaryCta: { label: 'Open App', href: '#' },
+    secondaryCta: { label: 'Back', path: '/' },
+    footer: 'CHECK YOUR INBOX',
+  },
+  'reset-success': {
+    type: 'reset-success',
+    headline: 'Password\nChanged.',
+    accent: '#4ade80',
+    bg: '#050a05',
+    statusCode: '200',
+    statusLabel: 'Password Updated',
+    body: 'Your password has been changed and every other session has been signed out. If this was not you, contact us straight away.',
+    logLines: ['token consumed', 'credential rotated', 'other sessions revoked'],
+    primaryCta: { label: 'Sign In', href: '#' },
+    secondaryCta: { label: 'Back', path: '/' },
+    footer: 'SESSIONS REVOKED',
+  },
+  'reset-failed': {
+    type: 'reset-failed',
+    headline: 'Reset\nFailed.',
+    accent: '#f87171',
+    bg: '#0a0505',
+    statusCode: '400',
+    statusLabel: 'Reset Link Invalid',
+    body: 'This reset link has expired or has already been used. Request a fresh one and it will arrive within a minute.',
+    logLines: ['token invalid or expired', 'password unchanged', 'action required'],
+    primaryCta: { label: 'Request New Link', href: '#' },
+    secondaryCta: { label: 'Back', path: '/' },
+    footer: 'ACTION REQUIRED',
+  },
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHAPE TIMELINE   hero particle morph schedule

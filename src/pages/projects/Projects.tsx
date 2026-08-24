@@ -67,6 +67,9 @@ type Project = (typeof projects)[number]
 const INACTIVE_STATUSES = new Set([
   'Paused', 'Archived', 'Dead', 'Defunct', 'Abandoned', 'Discontinued',
 ])
+const TERMINAL_STATUSES = new Set([
+  'Dead', 'Defunct', 'Abandoned', 'Discontinued',
+])
 const isInactive = (status: string) => INACTIVE_STATUSES.has(status)
 
 // ── Classified helpers ────────────────────────────────────────────────────────
@@ -592,59 +595,90 @@ function ProjectCard({
 // ── Inactive project row ──────────────────────────────────────────────────────
 function InactiveRow({ p }: { p: Project }) {
   const vis = (p as any).visibility as ProjectVisibility | undefined
+  const isTerminal = TERMINAL_STATUSES.has(p.status)
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      padding: '12px 14px',
-      background: '#080808',
-      border: '1px solid var(--border-faint, #111)',
-      borderRadius: '8px',
-    }}>
-      <img
-        src={p.appIconPath ?? (assets as any).defaultIcon}
-        alt=""
-        style={{
-          width: '34px', height: '34px', borderRadius: '8px',
-          border: '1px solid var(--border-strong, #1a1a1a)', flexShrink: 0,
-          filter: 'grayscale(1) opacity(0.35)', objectFit: 'cover',
-        }}
-        onError={e => {
-          const img = e.currentTarget
-          img.style.display = 'none'
-          const span = document.createElement('div')
-          span.style.cssText = 'width:34px;height:34px;border-radius:8px;background:#111;border:1px solid #1a1a1a;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#222'
-          span.textContent = p.name[0]
-          img.parentElement?.insertBefore(span, img)
-        }}
-      />
-
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '2px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-faint, #8a8a8a)' }}>{p.name}</span>
-          <span style={{ ...statusStyle(p.status as ProjectStatus), opacity: 0.5 }}>{p.status}</span>
-          {vis && vis !== 'Public' && (
-            <span style={{ ...visibilityBadgeStyle(vis), opacity: 0.5 }}>{vis}</span>
-          )}
-        </div>
-        <p style={{
-          fontSize: '11px', color: 'var(--text-ghost, #6a6a6a)', margin: 0,
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>{p.tagline}</p>
-      </div>
-
+    <Link
+      to={`/projects/${p.slug}`}
+      style={{ display: 'block', textDecoration: 'none' }}
+    >
       <div style={{
-        display: 'flex', gap: '6px', alignItems: 'center',
-        flexShrink: 0, fontSize: '10px', color: 'var(--text-ghost, #6a6a6a)',
-        fontFamily: 'var(--font-mono)',
-      }}>
-        <span>{p.platform}</span>
-        <span>·</span>
-        <span>{p.year}</span>
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        padding: '12px 14px',
+        background: '#080808',
+        border: '1px solid var(--border-faint, #111)',
+        borderRadius: '8px',
+        transition: 'background 0.2s',
+      }}
+        onMouseEnter={e => e.currentTarget.style.background = '#0d0d0d'}
+        onMouseLeave={e => e.currentTarget.style.background = '#080808'}
+      >
+        {isTerminal ? (
+          <div style={{
+            width: '34px', height: '34px', borderRadius: '8px',
+            border: '1px dashed rgba(229, 100, 78, 0.3)', flexShrink: 0,
+            background: 'rgba(229, 100, 78, 0.05)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'rgba(229, 100, 78, 0.7)'
+          }}>
+            <style>{`
+              @keyframes float-row-ghost {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-2px) rotate(5deg); }
+              }
+            `}</style>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'float-row-ghost 3s ease-in-out infinite' }}>
+              <path d="M9 10h.01M15 10h.01" />
+              <path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z" />
+            </svg>
+          </div>
+        ) : (
+          <img
+            src={p.appIconPath ?? (assets as any).defaultIcon}
+            alt=""
+            style={{
+              width: '34px', height: '34px', borderRadius: '8px',
+              border: '1px solid var(--border-strong, #1a1a1a)', flexShrink: 0,
+              filter: 'grayscale(1) opacity(0.35)', objectFit: 'cover',
+            }}
+            onError={e => {
+              const img = e.currentTarget
+              img.style.display = 'none'
+              const span = document.createElement('div')
+              span.style.cssText = 'width:34px;height:34px;border-radius:8px;background:#111;border:1px solid #1a1a1a;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#222'
+              span.textContent = p.name[0]
+              img.parentElement?.insertBefore(span, img)
+            }}
+          />
+        )}
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '2px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-faint, #8a8a8a)' }}>{p.name}</span>
+            <span style={{ ...statusStyle(p.status as ProjectStatus), opacity: 0.5 }}>{p.status}</span>
+            {vis && vis !== 'Public' && (
+              <span style={{ ...visibilityBadgeStyle(vis), opacity: 0.5 }}>{vis}</span>
+            )}
+          </div>
+          <p style={{
+            fontSize: '11px', color: 'var(--text-ghost, #6a6a6a)', margin: 0,
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>{p.tagline}</p>
+        </div>
+
+        <div style={{
+          display: 'flex', gap: '6px', alignItems: 'center',
+          flexShrink: 0, fontSize: '10px', color: 'var(--text-ghost, #6a6a6a)',
+          fontFamily: 'var(--font-mono)',
+        }}>
+          <span>{p.platform}</span>
+          <span>·</span>
+          <span>{p.year}</span>
+        </div>
       </div>
-    </div>
+    </Link>
   )
 }
 
@@ -752,7 +786,7 @@ export default function Projects() {
             </SectionHeading>
             <p style={{
               fontSize: '12px', color: 'var(--text-faint, #8a8a8a)',
-              lineHeight: 1.6, maxWidth: '480px', marginTop: '-2px',
+              lineHeight: 1.6, maxWidth: '480px', margin: '-2px 0 6px 0',
             }}>
               {projectsPage.inactiveNote}
             </p>
