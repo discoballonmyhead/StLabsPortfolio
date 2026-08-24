@@ -54,12 +54,19 @@
  *
  *  Internal, Internal Testing, and Restricted projects publish no links at all.
  */
+/**
+ * ProjectDetail.tsx
+ * src/features/projects/ProjectDetail.tsx
+ */
+
 import type { CSSProperties, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { Layout, Breadcrumb, SectionLabel, FadeUp } from '@/components'
+import { Layout, Breadcrumb, SectionLabel, AppHeader, FadeUp } from '@/components'
 import ImageCarousel from '@/components/ImageCarousel'
 import { projects } from '@/config'
-import type { ProjectStatus, ProjectVisibility } from '@/config'
+import type { ProjectStatus } from '@/config'
+import { collectProjectLinks, hidesLinks } from '@/lib/projectLinks'
+import type { ProjectLink } from '@/lib/projectLinks'
 import { useIsMobile } from '@/hooks'
 
 interface Props {
@@ -70,63 +77,8 @@ const ACCENT = '#FF8C55'
 const ACCENT_WARM = '#FFA070'
 const DANGER = '#E5644E'
 
-const HIDES_LINKS = new Set<ProjectVisibility>(['Internal', 'Internal Testing', 'Restricted'])
-const TERMINAL_STATUSES = new Set<ProjectStatus>(['Dead', 'Defunct', 'Abandoned', 'Discontinued'])
-
 // ─────────────────────────────────────────────────────────────────────────────
-// Link model
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface OutLink {
-  label: string
-  href: string
-  internal: boolean
-}
-
-function normaliseInternal(href: string): string {
-  if (!href.startsWith('/')) return href
-  return href.endsWith('/') ? `${href}index.html` : href
-}
-
-function isRealHref(href?: string): href is string {
-  if (!href) return false
-  const h = href.trim()
-  if (!h || h === '#') return false
-  if (h.toUpperCase().startsWith('REPLACE_')) return false
-  return true
-}
-
-function collectLinks(p: (typeof projects)[number]): { links: OutLink[]; configured: boolean } {
-  const links: OutLink[] = []
-  let configured = false
-
-  const push = (label: string, href?: string) => {
-    if (href !== undefined) configured = true
-    if (!isRealHref(href)) return
-    const internal = href.startsWith('/')
-    links.push({ label, href: internal ? normaliseInternal(href) : href, internal })
-  }
-
-  push('Launch build', p.build?.web)
-  push('Play on itch.io', p.build?.itch)
-  push('Download APK', p.build?.apk)
-  push('Download for Windows', p.build?.windows)
-  push('Download for macOS', p.build?.macos)
-  push('Download for Linux', p.build?.linux)
-  push('Join the TestFlight', p.build?.testflight)
-  push('Source on GitHub', p.build?.github)
-  p.build?.other?.forEach(o => push(o.label, o.href))
-
-  push('Get it on Google Play', p.stores?.googlePlay)
-  push('Download on the App Store', p.stores?.appStore)
-  push('Open the web app', p.stores?.web)
-  push('View on GitHub', p.stores?.github)
-
-  return { links, configured }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Icons & Graphics
+// Icons
 // ─────────────────────────────────────────────────────────────────────────────
 
 const IconExternal = ({ size = 12 }: { size?: number }) => (
@@ -217,7 +169,16 @@ function MetaRow({ label, value, last = false }: { label: string; value: ReactNo
   )
 }
 
-function ActionLink({ link, primary = false, large = false }: { link: OutLink; primary?: boolean; large?: boolean }) {
+/** One outbound link. Filled for the primary action, outlined for the rest. */
+function ActionLink({
+  link,
+  primary = false,
+  large = false,
+}: {
+  link: ProjectLink
+  primary?: boolean
+  large?: boolean
+}) {
   const style: CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
@@ -324,6 +285,7 @@ function BulletList({ items, marker }: { items: string[]; marker: 'check' | 'das
   )
 }
 
+/** Used when a build exists in config but has no real URL yet. */
 function PendingPill({ children }: { children: ReactNode }) {
   return (
     <span
@@ -347,141 +309,6 @@ function PendingPill({ children }: { children: ReactNode }) {
       />
       {children}
     </span>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Graveyard Banner
-// ─────────────────────────────────────────────────────────────────────────────
-
-function TerminalStatusBanner({ status }: { status: string }) {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '20px',
-        padding: '20px 24px',
-        background: 'rgba(255, 255, 255, 0.02)',
-        border: '1px solid var(--border-light, #2a2a2a)',
-        borderRadius: '12px',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          width: '48px',
-          height: '48px',
-          borderRadius: '12px',
-          background: 'var(--surface, #0a0a0a)',
-          border: '1px solid var(--border-strong, #1a1a1a)',
-          color: 'var(--text-ghost, #4e4e4e)',
-        }}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 10h.01M15 10h.01" />
-          <path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z" />
-        </svg>
-      </div>
-
-      <div>
-        <h4 style={{ margin: '0 0 4px', fontSize: '14.5px', fontWeight: 600, color: 'var(--text, #f2f2f2)' }}>
-          This project is {status.toLowerCase()}.
-        </h4>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-faint, #6a6a6a)', lineHeight: 1.6 }}>
-          It has reached the end of its active lifecycle and is no longer maintained. Links and downloads are provided purely for archival purposes and may no longer function.
-        </p>
-      </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Header & Badge Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-function getStatusColors(status: string) {
-  if (['Live', 'Beta'].includes(status)) return { bg: 'rgba(61, 220, 132, 0.15)', text: '#3DDC84', border: 'rgba(61, 220, 132, 0.3)' }
-  if (TERMINAL_STATUSES.has(status as ProjectStatus)) return { bg: 'rgba(229, 100, 78, 0.15)', text: DANGER, border: 'rgba(229, 100, 78, 0.3)' }
-  return { bg: 'rgba(255, 140, 85, 0.15)', text: ACCENT, border: 'rgba(255, 140, 85, 0.3)' }
-}
-
-function CustomProjectHeader({ p, isMobile }: { p: (typeof projects)[number]; isMobile: boolean }) {
-  const statusTheme = getStatusColors(p.status)
-  const isPublic = !p.visibility || p.visibility === 'Public'
-
-  // Use the path exactly as provided in the config
-  const iconSrc = p.appIconPath
-
-  return (
-    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '24px', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: '12px' }}>
-
-      {/* Icon Area with Badges */}
-      <div style={{ position: 'relative', flexShrink: 0 }}>
-
-        {/* The Icon Box */}
-        <div style={{
-          width: '96px', height: '96px',
-          borderRadius: '22px',
-          background: 'var(--surface, #1a1a1a)',
-          border: '1px solid var(--border-strong, #2a2a2a)',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          {iconSrc ? (
-            <img src={iconSrc} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(to bottom right, #2a2a2a, #1a1a1a)' }} />
-          )}
-        </div>
-
-        {/* Top-Right Badge: Status */}
-        <div style={{
-          position: 'absolute', top: '-8px', right: '-16px', zIndex: 10,
-          background: statusTheme.bg, color: statusTheme.text, border: `1px solid ${statusTheme.border}`,
-          padding: '4px 10px', borderRadius: '100px', fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.04em',
-          textTransform: 'uppercase', backdropFilter: 'blur(8px)'
-        }}>
-          {p.status}
-        </div>
-
-        {/* Bottom-Right Badge: Access */}
-        {!isPublic && (
-          <div style={{
-            position: 'absolute', bottom: '-8px', right: '-16px', zIndex: 10,
-            background: 'rgba(168, 85, 247, 0.15)', color: '#C084FC', border: '1px solid rgba(168, 85, 247, 0.3)',
-            padding: '4px 10px', borderRadius: '100px', fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.04em',
-            textTransform: 'uppercase', backdropFilter: 'blur(8px)'
-          }}>
-            {p.visibility}
-          </div>
-        )}
-      </div>
-
-      {/* Title & Tagline Area */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <h1 style={{ margin: 0, fontSize: '28px', color: '#fff', letterSpacing: '-0.02em', fontWeight: 700 }}>
-          {p.name}
-        </h1>
-        <p style={{ margin: 0, fontSize: '15px', color: 'var(--text-muted, #8a8a8a)', lineHeight: 1.5, maxWidth: '600px' }}>
-          {p.tagline}
-        </p>
-
-        {/* Tech Stack Chips */}
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
-          {p.tech.map(t => (
-            <span key={t} style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '100px', background: 'rgba(255,255,255,0.04)', color: '#a3a3a3', border: '1px solid rgba(255,255,255,0.05)' }}>
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -557,46 +384,55 @@ export default function ProjectDetail({ slug }: Props) {
   const hasMedia = !!(p.coverImage || (p.screenshots && p.screenshots.length > 0))
 
   const visibility = p.visibility
-  const linksHidden = !!visibility && HIDES_LINKS.has(visibility)
-  const isTerminal = TERMINAL_STATUSES.has(p.status as ProjectStatus)
+  const linksHidden = hidesLinks(visibility)
 
-  const { links, configured } = collectLinks(p)
-
+  const { links, configured } = collectProjectLinks(p)
   const visibleLinks = linksHidden ? [] : links
   const primary = visibleLinks[0]
   const rest = visibleLinks.slice(1)
+
+  // Something was configured but every href is still a placeholder.
   const pending = !linksHidden && configured && visibleLinks.length === 0
 
   return (
     <Layout>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '36px' }}>
 
-        <Breadcrumb items={[{ label: 'Home', path: '/' }, { label: 'Projects', path: '/projects' }, { label: p.name }]} />
+        <Breadcrumb
+          items={[
+            { label: 'Home', path: '/' },
+            { label: 'Projects', path: '/projects' },
+            { label: p.name },
+          ]}
+        />
 
-        {/* ── Custom Dual-Badge Header ── */}
-        <CustomProjectHeader p={p} isMobile={isMobile} />
-
-        {/* ── Terminal Animation Banner ── */}
-        {isTerminal && (
-          <FadeUp delay={0.02}>
-            <TerminalStatusBanner status={p.status} />
-          </FadeUp>
-        )}
+        <AppHeader
+          label={p.label}
+          title={p.name}
+          tagline={p.tagline}
+          tags={[p.status, ...p.tech]}
+          statusTag={p.status as ProjectStatus}
+        />
 
         {/* ── Launch bar ── */}
         {(primary || pending || linksHidden) && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
             {primary && <ActionLink link={primary} primary large />}
+
             {primary && primary.internal && (
               <span style={{ fontSize: '11.5px', color: 'var(--text-ghost, #4e4e4e)' }}>
                 Runs right here, nothing to install.
               </span>
             )}
+
             {rest.length > 0 && (
               <span style={{ fontSize: '11.5px', color: 'var(--text-ghost, #4e4e4e)' }}>
-                {rest.length === 1 ? 'One other way to get it, listed below.' : `${rest.length} other ways to get it, listed below.`}
+                {rest.length === 1
+                  ? 'One other way to get it, listed below.'
+                  : `${rest.length} other ways to get it, listed below.`}
               </span>
             )}
+
             {pending && <PendingPill>Build is not published yet</PendingPill>}
             {linksHidden && <PendingPill>{visibility} project, links are not published</PendingPill>}
           </div>
@@ -604,7 +440,11 @@ export default function ProjectDetail({ slug }: Props) {
 
         {hasMedia && (
           <FadeUp>
-            <ImageCarousel coverImage={p.coverImage} screenshots={p.screenshots} projectName={p.name} />
+            <ImageCarousel
+              coverImage={p.coverImage}
+              screenshots={p.screenshots}
+              projectName={p.name}
+            />
           </FadeUp>
         )}
 
@@ -619,13 +459,17 @@ export default function ProjectDetail({ slug }: Props) {
             paddingTop: 'clamp(28px, 4vw, 44px)',
           }}
         >
+
           {/* Main column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', minWidth: 0 }}>
+
             <FadeUp>
               <section>
                 <SectionLabel>About</SectionLabel>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '4px' }}>
-                  {p.about.map((para, i) => <p key={i} style={bodyText}>{para}</p>)}
+                  {p.about.map((para, i) => (
+                    <p key={i} style={bodyText}>{para}</p>
+                  ))}
                 </div>
               </section>
             </FadeUp>
@@ -634,7 +478,9 @@ export default function ProjectDetail({ slug }: Props) {
               <FadeUp delay={0.05}>
                 <section>
                   <SectionLabel>Features</SectionLabel>
-                  <div style={{ marginTop: '4px' }}><BulletList items={p.features} marker="check" /></div>
+                  <div style={{ marginTop: '4px' }}>
+                    <BulletList items={p.features} marker="check" />
+                  </div>
                 </section>
               </FadeUp>
             )}
@@ -643,7 +489,9 @@ export default function ProjectDetail({ slug }: Props) {
               <FadeUp delay={0.08}>
                 <section>
                   <SectionLabel>Stack</SectionLabel>
-                  <div style={{ marginTop: '4px' }}><BulletList items={p.stackNotes} marker="dash" /></div>
+                  <div style={{ marginTop: '4px' }}>
+                    <BulletList items={p.stackNotes} marker="dash" />
+                  </div>
                 </section>
               </FadeUp>
             )}
@@ -660,14 +508,21 @@ export default function ProjectDetail({ slug }: Props) {
               minWidth: 0,
             }}
           >
+
             <FadeUp>
               <Card title="Details">
                 <MetaRow label="Platform" value={p.platform} />
                 <MetaRow label="Year" value={p.year} />
-                <MetaRow label="Status" value={p.status} last={!visibility || visibility === 'Public'} />
-                {visibility && visibility !== 'Public' && <MetaRow label="Access" value={<span style={{ color: ACCENT }}>{visibility}</span>} last />}
+                <MetaRow
+                  label="Status"
+                  value={p.status}
+                  last={!visibility || visibility === 'Public'}
+                />
+                {visibility && visibility !== 'Public' && (
+                  <MetaRow label="Access" value={<span style={{ color: ACCENT }}>{visibility}</span>} last />
+                )}
                 <p style={{ fontSize: '11px', color: 'var(--text-ghost, #4e4e4e)', margin: '12px 0 0' }}>
-                  Last reviewed {p.privacy?.updated || 'recently'}
+                  Last reviewed {p.privacy.updated}
                 </p>
               </Card>
             </FadeUp>
@@ -681,9 +536,15 @@ export default function ProjectDetail({ slug }: Props) {
                     </p>
                   ) : visibleLinks.length > 0 ? (
                     <>
-                      {(p.buildNote || p.storeNote) && <p style={{ fontSize: '12px', color: 'var(--text-faint, #6a6a6a)', lineHeight: 1.65, margin: '0 0 12px' }}>{p.buildNote ?? p.storeNote}</p>}
+                      {(p.buildNote || p.storeNote) && (
+                        <p style={{ fontSize: '12px', color: 'var(--text-faint, #6a6a6a)', lineHeight: 1.65, margin: '0 0 12px' }}>
+                          {p.buildNote ?? p.storeNote}
+                        </p>
+                      )}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {visibleLinks.map((link, i) => <ActionLink key={link.href + i} link={link} primary={i === 0} />)}
+                        {visibleLinks.map((link, i) => (
+                          <ActionLink key={link.href + i} link={link} primary={i === 0} />
+                        ))}
                       </div>
                     </>
                   ) : (
@@ -694,6 +555,7 @@ export default function ProjectDetail({ slug }: Props) {
                 </Card>
               </FadeUp>
             )}
+
           </aside>
         </div>
 

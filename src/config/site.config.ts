@@ -421,6 +421,14 @@ export const homeSections: HomeSections = {
         blurb: 'No engagement ranking, no infinite scroll, no notification bait. The hard part was proving the product still holds up once you remove the parts designed to trap people.',
         accent: '#F2E9DC',
       },
+      {
+        slug: 'clasher-st',
+        metric: '100%',
+        unit: 'server-verified',
+        label: 'True Elo, zero manipulation',
+        blurb: 'Built for competitive integrity. Match results and Elo ratings are calculated securely on the server. No pay-to-win mechanics, no bought accounts, and any attempt to manipulate the ladder results in a permanent ban.',
+        accent: '#FF8C55', // Matching the ACCENT color used in your components
+      }
     ],
   },
 
@@ -1011,11 +1019,15 @@ export const projects: ProjectConfig[] = [
     //   googlePlay: "https://play.google.com/store/apps/details?id=...",
     //   appStore: "https://apps.apple.com/app/..."
     // },
-
+    hasAuthPages: true,
+    hasEmailConfirmation: true,
+    hasPasswordReset: true,
     build: { web: '/builds/clasher-st/index.html' },
     storeNote: "Public build, in active development.",
     legalNote: "Accounts are required for organizers and ranked players. We collect basic profile data but zero data for targeted advertising. Account deletion requests are processed within 30 business days.",
-
+    theme: {
+      accent: '#84cc16' // So the confirmation page matches your email button color!
+    },
     privacy: {
       updated: "August 17, 2026",
       contact: "info@stateless-labs.com",
