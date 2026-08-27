@@ -64,6 +64,7 @@ export const assets = {
     projectVault: '/icons/project-vault.png',
     projectKin: '/icons/project-kin.png',
     projectFunnyCalculator: '/icons/projectFunnyCalculator.png',
+    projectRawIntel: '',
   },
 } as const
 
@@ -1167,6 +1168,78 @@ export const projects: ProjectConfig[] = [
       androidPermission: true,
     },
   },
+
+  {
+    slug: 'raw-intel',
+    name: 'RawIntel',
+    tagline: 'Raw intelligence, without the noise. An unbiased, privacy-first news aggregator.',
+    year: '2026',
+    platform: 'Cross-platform',
+    status: 'Beta',
+    tech: ['Flutter', 'Dart', 'Node.js', 'PostgreSQL', 'Supabase'],
+    label: 'Cross-platform App · 2026',
+    appIconPath: assets.icons.projectRawIntel,
+
+    about: [
+      'RawIntel was built to strip away the sensationalism and tracking inherent in modern journalism. It aggregates top stories, uses transparent algorithms to highlight heavily biased phrasing, and presents the core facts from multiple verified sources in a clean, distraction-free interface.',
+      'Privacy is a first-class feature. The app blocks all third-party analytics, prevents fingerprinting, and requires only a verified email to sync your reading preferences across devices. No hidden algorithms manipulate your feed; you see the news exactly as it unfolds.'
+    ],
+
+    features: [
+      'Multi-source verification to cross-check claims instantly',
+      'On-device bias detection highlighting emotionally loaded terminology',
+      'Strict chronological feed with zero algorithmic manipulation',
+      'Completely ad-free and tracker-free reading experience',
+      'Secure cross-device syncing via Supabase Auth',
+      'Email confirmation required to ensure platform integrity'
+    ],
+
+    stackNotes: [
+      'Flutter for a seamless native experience on iOS, Android, and Web',
+      'Node.js backend for parsing and sanitizing news APIs',
+      'Supabase (PostgreSQL) for secure user preferences and Auth',
+      'Offline-first architecture with local SQLite caching'
+    ],
+
+    stores: { googlePlay: '#', appStore: '#', web: 'https://app.rawintel.example.com' },
+    storeNote: 'Currently in Beta. Available on web and private test tracks for mobile.',
+    legalNote: 'RawIntel acts strictly as a neutral aggregator. We collect zero analytics. Your reading preferences are tied only to your confirmed email address and are never sold.',
+
+    privacy: {
+      updated: 'August 28, 2026',
+      contact: 'privacy@rawintel.example.com',
+      collectsData: true,
+      summaryOverride: 'We collect the bare minimum required to sync your preferences. We do not track your reading history, sell your data, or serve third-party ads.',
+      permissions: [
+        { name: 'INTERNET', purpose: 'Required to fetch the latest news articles and sync your account.' }
+      ],
+      dataCollected: [
+        'Email address (requires confirmation) and hashed password for account access',
+        'Opt-in saved topics and trusted source preferences'
+      ],
+      localStorageNote: 'Locally caches recently read articles on your device to save bandwidth and enable offline reading.'
+    },
+
+    terms: {
+      updated: 'August 28, 2026',
+      contact: 'legal@rawintel.example.com',
+      summaryOverride: 'We provide the aggregator; you provide the critical thinking. These terms ensure a safe, private environment for all readers.',
+      minimumAge: 16,
+      hasAccounts: true,
+      hasPayments: false,
+      hasUserContent: false,
+      governingLaw: 'EU'
+    },
+
+    hasAuthPages: true,
+    hasEmailConfirmation: true,
+    hasPasswordReset: true,
+
+    deletion: {
+      identifierLabel: 'Account Email',
+      extraNote: 'Deleting your account will instantly remove your email and all saved preferences from our active database.'
+    }
+  }
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
