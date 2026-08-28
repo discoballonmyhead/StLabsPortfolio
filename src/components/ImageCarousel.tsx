@@ -19,7 +19,7 @@ interface Props {
 
 const STYLE_ID = 'carousel-styles'
 function ensureStyles() {
-    if (document.getElementById(STYLE_ID)) return
+    if (typeof document === 'undefined' || document.getElementById(STYLE_ID)) return
     const el = document.createElement('style')
     el.id = STYLE_ID
     el.textContent = `

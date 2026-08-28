@@ -16,7 +16,7 @@ import { brand, assets } from '@/config'
 const STYLE_ID = 'resolve-keyframes'
 
 function ensureKeyframes() {
-  if (document.getElementById(STYLE_ID)) return
+  if (typeof document === 'undefined' || document.getElementById(STYLE_ID)) return
   const el = document.createElement('style')
   el.id = STYLE_ID
   el.textContent = `

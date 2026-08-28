@@ -52,7 +52,7 @@ import { musicConfig } from '@/config'
 // ── Styles ────────────────────────────────────────────────────────────────────
 const STYLE_ID = 'mp-styles'
 function ensureStyles() {
-    if (document.getElementById(STYLE_ID)) return
+    if (typeof document === 'undefined' || document.getElementById(STYLE_ID)) return
     const el = document.createElement('style')
     el.id = STYLE_ID
     el.textContent = `
