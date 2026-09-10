@@ -1045,15 +1045,73 @@ export const projects: ProjectConfig[] = [
     },
 
     terms: {
-      updated: "August 17, 2026",
+      updated: "September 11, 2026",
       contact: "info@stateless-labs.com",
       hasAccounts: true,
       extraClauses: [
+        {
+          title: "Acceptance of Terms and Legal Compliance",
+          body: [
+            "By accessing, registering for, or using this application, the user explicitly agrees to be bound by all conditions and terms outlined in this document.",
+            "Regardless of the language in which these terms are presented, translated, or read, by accepting them, the user acknowledges that they have fully read, completely understood, and agreed to all terms and conditions herein.",
+            "Users are strictly subject to, and must comply with, all local, state, and national laws in the jurisdiction from which they use the application. Any violation of applicable laws will result in an immediate and permanent ban.",
+            "The application, its developers, and operators take absolutely no responsibility for the actions, conduct, or legal violations of its users."
+          ]
+        },
         {
           title: "Competitive Integrity and Account Rules",
           body: [
             "Any misconduct intended to manipulate the leaderboard will result in an immediate and permanent ban. This includes intentionally raising your Elo rating through faulty means, match fixing, or exploiting system mechanics.",
             "Charging real world money for leaderboard placement, as well as buying or selling accounts, is strictly prohibited. If an account is caught participating in these activities, it will be banned permanently. This rule applies equally to verified accounts."
+          ]
+        },
+        {
+          title: "App Purpose and Prize Distributions",
+          body: [
+            "This application is strictly provided as a tool for managing tournaments. No prizes, cash, or physical rewards are distributed directly through or by this application.",
+            "If users or organizations choose to distribute independent prizes outside of the application, they are solely responsible for ensuring that such distributions strictly comply with all applicable local, state, and national laws in their respective jurisdictions."
+          ]
+        },
+        {
+          title: "Platform Neutrality and Inter-Organization Disputes",
+          body: [
+            "This platform operates as a neutral software provider. We do not mediate, arbitrate, or assume liability for disputes, rivalries, or conflicts between independent users, teams, or organizations.",
+            "Weaponizing the platform’s reporting, support, or trading systems to maliciously attack or pressure rival organizations is strictly prohibited and will result in immediate bans and loss of verification for all offending parties."
+          ]
+        },
+        {
+          title: "Content Guidelines and Bannable Offenses",
+          body: [
+            "Users are strictly prohibited from uploading or displaying sexual, explicit, or highly objectionable imagery in showcases.",
+            "The use of AI-generated images in showcases or as trade items is strictly forbidden. Violating these content guidelines will result in an immediate and permanent ban."
+          ]
+        },
+        {
+          title: "Trading Rules and Account Suspensions",
+          body: [
+            "Maintaining a fair trading environment is required. If an account receives 3 verified reports for failed trades, duplicate trades, or scamming, the account will be immediately suspended.",
+            "Suspended users must go through a formal appeal process with support to have their trading privileges and account access reinstated."
+          ]
+        },
+        {
+          title: "Organization Conduct and Verification",
+          body: [
+            "Organizations are held to a higher standard. Organizations found guilty of malicious acts, including Elo manipulation or Battlepass abuse, will be banned and permanently stripped of their verification status.",
+            "Battlepass abuse includes, but is not limited to, distributing loot box tickets, gambling mechanics, or any other form of illegitimate items as rewards within the Battlepass system."
+          ]
+        },
+        {
+          title: "Right to Terminate and Indemnification",
+          body: [
+            "We reserve the right to suspend, terminate, or refuse service to any user or organization at any time, for any reason, without prior notice or liability.",
+            "By using this app, you agree to indemnify and hold harmless Stateless Labs from any claims, damages, or legal fees arising from your use of the platform, violation of these terms, or conflicts with third parties."
+          ]
+        },
+        {
+          title: "Global Limitation of Liability",
+          body: [
+            "The developers and operators of this application assume no responsibility or liability for user interactions, independent prize fulfillment, or user-generated content.",
+            "While currently operating in the United States and Vietnam, this limitation of liability applies globally. Users access the application at their own risk, and we disclaim all warranties, express or implied, to the maximum extent permitted by law."
           ]
         }
       ]
