@@ -415,7 +415,7 @@ export default function ProjectDetail({ slug }: Props) {
         />
 
         {/* ── Launch bar ── */}
-        {(primary || pending || linksHidden) && (
+        {!linksHidden && (primary || pending) && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
             {primary && <ActionLink link={primary} primary large />}
 
@@ -434,7 +434,6 @@ export default function ProjectDetail({ slug }: Props) {
             )}
 
             {pending && <PendingPill>Build is not published yet</PendingPill>}
-            {linksHidden && <PendingPill>{visibility} project, links are not published</PendingPill>}
           </div>
         )}
 

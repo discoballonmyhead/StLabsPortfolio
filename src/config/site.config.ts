@@ -981,6 +981,53 @@ export const projects: ProjectConfig[] = [
       androidPermission: false
     }
   },
+
+  {
+    slug: "project-edmgmt-feat",
+    name: "EdMgmt Assessment Tool",
+    tagline: "An offline-first Flutter application for scoring students securely via a Google Sheets backend.",
+    year: "2026",
+    platform: "Web",
+    status: "In Development",
+    visibility: "Internal", // This triggers the hidden links logic
+    tech: ["Flutter", "Dart", "Google Apps Script", "Google Sheets"],
+    label: "Web App · 2026",
+    appIconPath: "assets.icons.projectEdMgmt",
+
+    about: [
+      "A Flutter application built for test centres and teachers to rapidly grade students in real-time. It completely bypasses traditional databases in favour of using Google Sheets as a headless CMS, powered by a custom Google Apps Script API.",
+      "Because test environments often have poor internet, the app is built completely offline-first. It caches the latest roster and rubric data locally, allowing examiners to score entire sessions offline and sync them when the connection is restored.",
+      "The backend features a highly optimized Apps Script instance using a Versioned Cache pattern for sub-100ms response times, and tracks changes using cryptographic device signatures so edits are attributable without requiring user accounts."
+    ],
+
+    features: [
+      "Direct read/write integration with Google Sheets",
+      "Robust offline-first support for uninterrupted classroom grading",
+      "Instant loading speeds using Apps Script CacheService",
+      "Cryptographic device signatures for edit accountability",
+      "Dynamic scoring rubrics synchronized from the spreadsheet",
+      "On-device generation of print-ready PDF reports"
+    ],
+
+    stackNotes: [
+      "Flutter (Web & Mobile) with BLoC state management",
+      "Clean Architecture mapping strictly to spreadsheet schemas",
+      "Google Apps Script (ES5 JavaScript) REST API backend",
+      "Google Workspace Drive API for PDF report storage",
+      "Local storage for aggressive read-caching"
+    ],
+
+    build: { web: '/builds/project-edmgmt-feat/index.html' },
+    storeNote: "Internal examiner tool. Links are restricted to staff.",
+    legalNote: "No centralized authentication required. Progress and cached rosters are stored exclusively in the browser's local storage. Tracks device identifiers for audit logging.",
+
+    privacy: {
+      updated: "September 30, 2026",
+      contact: "privacy@example.com",
+      collectsData: true,
+      androidPermission: false
+    }
+  },
   {
     slug: "clasher-st",
     name: "Clasher ST",
@@ -1132,6 +1179,7 @@ export const projects: ProjectConfig[] = [
       extraNote: "Upon request, your account and all associated data (including images, profile details, and match history) will be permanently deleted within 30 business days."
     }
   },
+
   {
     slug: 'project-vault',
     name: 'Project Vault',
