@@ -989,7 +989,7 @@ export const projects: ProjectConfig[] = [
     year: "2026",
     platform: "Web",
     status: "In Development",
-    visibility: "Internal", // This triggers the hidden links logic
+    //  visibility: "Internal", // This triggers the hidden links logic
     tech: ["Flutter", "Dart", "Google Apps Script", "Google Sheets"],
     label: "Web App · 2026",
     appIconPath: "assets.icons.projectEdMgmt",
