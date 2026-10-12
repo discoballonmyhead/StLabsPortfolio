@@ -1,0 +1,2 @@
+Save the start-up sound here as splash.mp3 (about 1.3 s).
+Without it the splash screen simply skips the sound.
