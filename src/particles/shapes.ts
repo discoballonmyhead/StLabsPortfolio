@@ -762,22 +762,65 @@ function blackHole(n: number, rng: Rng): ShapeData {
   return makeShape(pts.slice(0, n), lines, coreEnd)
 }
 
+
+
+// ── 18. END-TO-END WAVE ────────────────────────────────────────────────────────
+function wave(n: number, rng: Rng, time: number = 0, stretch: number = 5.0): ShapeData {
+  const pts: number[][] = [], lines: number[] = []
+  const length = stretch // Length is now dynamically set by the viewport!
+  const width = 1.5
+  const strands = 12
+  const ptsPerStrand = Math.floor((n * 0.4) / strands)
+
+  const phaseOffset = time * Math.PI * 2
+
+  for (let s = 0; s < strands; s++) {
+    const z = (s / (strands - 1) - 0.5) * width
+    const startIdx = pts.length
+    for (let i = 0; i < ptsPerStrand; i++) {
+      const t = i / (ptsPerStrand - 1)
+      const x = (t - 0.5) * length
+      const y = Math.sin(t * Math.PI * 3 + phaseOffset) * 0.4 +
+        Math.sin(t * Math.PI * 1.5 + z * 4 - phaseOffset * 0.5) * 0.2
+      pts.push([x, y, z])
+    }
+    for (let i = 0; i < ptsPerStrand - 1; i++) {
+      lines.push(startIdx + i, startIdx + i + 1)
+    }
+  }
+
+  while (pts.length < n) {
+    const t = rng()
+    const x = (t - 0.5) * length
+    const z = (rng() - 0.5) * width * 1.5
+    const baseY = Math.sin(t * Math.PI * 3 + phaseOffset) * 0.4 +
+      Math.sin(t * Math.PI * 1.5 + z * 4 - phaseOffset * 0.5) * 0.2
+    const y = baseY + (rng() - 0.5) * 0.6
+    pts.push([x, y, z])
+  }
+
+  return makeShape(pts.slice(0, n), lines)
+}
 // ── Registry + cache ──────────────────────────────────────────────────────────
 export type ShapeName =
   | 'galaxy' | 'androGalaxy' | 'icosphere' | 'torusKnot' | 'shell'
   | 'mobiusTube' | 'tesseract' | 'trefoil' | 'dnaHelix' | 'hyperboloid'
   | 'superEllipsoid' | 'dodecahedron' | 'stellated' | 'lissajous'
-  | 'roseCurve' | 'statelessLogo' | 'blackHole'
+  | 'roseCurve' | 'statelessLogo' | 'blackHole' | 'wave' // <-- Add 'wave' here
 
 export const SHAPE_NAMES: ShapeName[] = [
   'galaxy', 'androGalaxy', 'icosphere', 'torusKnot', 'shell', 'mobiusTube',
   'tesseract', 'trefoil', 'dnaHelix', 'hyperboloid', 'superEllipsoid',
-  'dodecahedron', 'stellated', 'lissajous', 'roseCurve', 'statelessLogo', 'blackHole',
+  'dodecahedron', 'stellated', 'lissajous', 'roseCurve', 'statelessLogo', 'blackHole', 'wave',
 ]
 
 const _cache = new Map<string, ShapeData>()
+export function sampleShape(name: ShapeName, n: number, time: number = 0, stretch: number = 5.0): ShapeData {
+  if (name === 'wave') {
+    const rng = mulberry32(hashStr(name) ^ (n * 2654435761))
+    return wave(n, rng, time, stretch)
+  }
 
-export function sampleShape(name: ShapeName, n: number): ShapeData {
   const key = `${name}:${n}`
   const hit = _cache.get(key); if (hit) return hit
   const rng = mulberry32(hashStr(name) ^ (n * 2654435761))

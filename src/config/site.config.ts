@@ -1035,7 +1035,7 @@ export const projects: ProjectConfig[] = [
     year: "2026",
     platform: "Web",
     status: "In Development",
-    tech: ["Flutter", "Dart", "Web", "Supabase"],
+    tech: ["Flutter", "Dart",],
     label: "Web App · 2026",
     appIconPath: "/icons/clasherst.png",
     coverImage: "/icons/clasherst.png",
@@ -1351,7 +1351,6 @@ export const projects: ProjectConfig[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 // STATUS PAGES   auth and email confirmation
 // ─────────────────────────────────────────────────────────────────────────────
-
 export type StatusPageType =
   | 'auth-success' | 'auth-failed'
   | 'email-sent' | 'email-confirmed' | 'email-failed'
@@ -1360,127 +1359,87 @@ export type StatusPageType =
 export interface StatusPageConfig {
   type: StatusPageType
   headline: string
-  accent: string
-  bg: string
   statusCode?: string
   statusLabel: string
   body: string
-  logLines: string[]
   primaryCta: { label: string; href: string }
-  secondaryCta: { label: string; path: string }
   footer: string
 }
 
 export const statusPages: Record<StatusPageType, StatusPageConfig> = {
   'auth-success': {
     type: 'auth-success',
-    headline: 'Access\nGranted.',
-    accent: '#4ade80',
-    bg: '#050a05',
+    headline: 'Access Granted.',
     statusCode: '200',
     statusLabel: 'Authentication Successful',
     body: 'Identity verified. You can return to the application, this window will close automatically.',
-    logLines: ['oauth token validated', 'session created', 'permissions granted'],
     primaryCta: { label: 'Open App', href: '#' },
-    secondaryCta: { label: 'Back', path: '/' },
     footer: 'SECURE SESSION',
   },
   'auth-failed': {
     type: 'auth-failed',
-    headline: 'Access\nDenied.',
-    accent: '#f87171',
-    bg: '#0a0505',
+    headline: 'Access Denied.',
     statusCode: '401',
     statusLabel: 'Authentication Failed',
     body: 'The authentication attempt could not be completed. This may be due to an expired session, cancelled request, or invalid credentials.',
-    logLines: ['token exchange failed', 'session not created', 'access revoked'],
     primaryCta: { label: 'Try Again', href: '#' },
-    secondaryCta: { label: 'Back', path: '/' },
     footer: 'SESSION ENDED',
   },
   'email-sent': {
     type: 'email-sent',
-    headline: 'Message\nDelivered.',
-    accent: '#7c6fcd',
-    bg: '#09080a',
+    headline: 'Message Delivered.',
     statusCode: undefined,
     statusLabel: 'Sent',
     body: 'The confirmation email is on its way. Check your inbox and follow the link to complete sign up.',
-    logLines: ['message queued', 'smtp handshake complete', 'delivery confirmed'],
     primaryCta: { label: 'Open App', href: '#' },
-    secondaryCta: { label: 'Back', path: '/' },
     footer: 'EMAIL CONFIRMATION',
   },
   'email-confirmed': {
     type: 'email-confirmed',
-    headline: 'Email\nVerified.',
-    accent: '#4ade80',
-    bg: '#050a05',
+    headline: 'Email Verified.',
     statusCode: '200',
     statusLabel: 'Confirmed',
-    body: 'Your email address has been verified. Your account is now active.',
-    logLines: ['token validated', 'email marked verified', 'account activated'],
-    primaryCta: { label: 'Open App', href: '#' },
-    secondaryCta: { label: 'Back', path: '/' },
+    body: 'Your email address has been verified. Your account is now active and ready to use.',
+    primaryCta: { label: 'Log in to App', href: '/login' },
     footer: 'ACCOUNT ACTIVE',
   },
   'email-failed': {
     type: 'email-failed',
-    headline: 'Verification\nFailed.',
-    accent: '#f87171',
-    bg: '#0a0505',
+    headline: 'Verification Failed.',
     statusCode: '400',
     statusLabel: 'Confirmation Failed',
     body: 'The verification link has expired or is invalid. Please request a new confirmation email.',
-    logLines: ['token invalid or expired', 'email not verified', 'action required'],
     primaryCta: { label: 'Resend Email', href: '#' },
-    secondaryCta: { label: 'Back', path: '/' },
     footer: 'ACTION REQUIRED',
   },
-
-  // ── Password reset ────────────────────────────────────────────────────────
   'reset-sent': {
     type: 'reset-sent',
-    headline: 'Reset Link\nSent.',
-    accent: '#7c6fcd',
-    bg: '#09080a',
+    headline: 'Reset Link Sent.',
     statusCode: undefined,
     statusLabel: 'Sent',
     body: 'If that address has an account, a reset link is on its way. The link expires in one hour, and asking again invalidates the previous one.',
-    logLines: ['reset token issued', 'message queued', 'expiry set to 60 minutes'],
     primaryCta: { label: 'Open App', href: '#' },
-    secondaryCta: { label: 'Back', path: '/' },
     footer: 'CHECK YOUR INBOX',
   },
   'reset-success': {
     type: 'reset-success',
-    headline: 'Password\nChanged.',
-    accent: '#4ade80',
-    bg: '#050a05',
+    headline: 'Password Changed.',
     statusCode: '200',
     statusLabel: 'Password Updated',
     body: 'Your password has been changed and every other session has been signed out. If this was not you, contact us straight away.',
-    logLines: ['token consumed', 'credential rotated', 'other sessions revoked'],
-    primaryCta: { label: 'Sign In', href: '#' },
-    secondaryCta: { label: 'Back', path: '/' },
+    primaryCta: { label: 'Sign In', href: '/login' },
     footer: 'SESSIONS REVOKED',
   },
   'reset-failed': {
     type: 'reset-failed',
-    headline: 'Reset\nFailed.',
-    accent: '#f87171',
-    bg: '#0a0505',
+    headline: 'Reset Failed.',
     statusCode: '400',
     statusLabel: 'Reset Link Invalid',
     body: 'This reset link has expired or has already been used. Request a fresh one and it will arrive within a minute.',
-    logLines: ['token invalid or expired', 'password unchanged', 'action required'],
     primaryCta: { label: 'Request New Link', href: '#' },
-    secondaryCta: { label: 'Back', path: '/' },
     footer: 'ACTION REQUIRED',
   },
 }
-
-
 // ─────────────────────────────────────────────────────────────────────────────
 // SHAPE TIMELINE   hero particle morph schedule
 // ─────────────────────────────────────────────────────────────────────────────

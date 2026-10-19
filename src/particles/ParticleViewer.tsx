@@ -1,37 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { sampleShape } from './shapes'
 import type { ShapeName } from './shapes'
-import type { SectionParticleConfig, ShapeTimelineEntry } from './particles.config'
-
-/**
- * ParticleViewer — v4
- *
- * Same renderer as v3 (fused loop, counting-sorted depth buckets, cached LUTs,
- * bloom cache, IntersectionObserver, idle pre-sampling). What changed is the
- * MORPH CLOCK:
- *
- *  TIMELINE MODE (new, preferred) — config.timeline is an explicit list of
- *    { at, shape, color? } entries authored in site.config.ts. Each shape is
- *    FULLY FORMED at its `at` timestamp; the morph into it occupies the
- *    `morphDuration` seconds immediately before `at`. This is the "I decide
- *    the timestamps" mode: nothing is derived from hold/cycle arithmetic.
- *
- *    Efficiency: the per-frame resolve is O(1) amortized. A segment CURSOR
- *    remembers which timeline entry we're inside and only steps forward when
- *    currentTime crosses the next boundary (one comparison per frame in the
- *    steady state). Seeks backwards and the track's loop wrap are detected
- *    (t dropped by >0.25s) and reset the cursor. No unbounded index growth,
- *    no per-frame floor/div cycle math, no modulo chains — v3 accumulated
- *    baseIdx forever and re-derived it from scratch every frame.
- *
- *  LEGACY CYCLE MODE — if no timeline is provided (the section configs),
- *    the old morphHold / morphHoldNext / morphDuration cycle still applies,
- *    so nothing else on the site changes.
- *
- * Both modes are pure functions of the <audio id="mp-audio"> currentTime, so
- * pausing the song pauses the shapes, mid-song mounts land on the correct
- * shape, and morph speed is refresh-rate independent — all unchanged from v3.
- */
+import type { SectionParticleConfig } from './particles.config'
+import { useSystemTheme } from '../hooks/useSystemTheme'
 
 interface Props {
   config: SectionParticleConfig
@@ -48,12 +19,21 @@ const smoothstep = (t: number) => t * t * (3 - 2 * t)
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v)
 
 const TAU = Math.PI * 2
-const DOT_B = 16                      // dot depth buckets
-const LINE_B = 8                      // line depth buckets
-const ALPHA_REP = [0.54, 0.73, 0.91]  // quantized per-particle alpha classes
+const DOT_B = 16
+const LINE_B = 8
+const ALPHA_REP = [0.54, 0.73, 0.91]
+
+// Deepest z a wave point can reach after the 0.12 tilt (fill points go to ±1.125).
+// Used so even the farthest, most perspective-shrunk points still reach the screen edges.
+const WAVE_Z_MAX = 1.2
+// Extra bleed past the screen edges so the wave never visibly ends.
+const WAVE_BLEED = 1.1
 
 export default function ParticleViewer({ config, style, className }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  const theme = useSystemTheme()
+  const isDark = theme === 'dark'
 
   useEffect(() => {
     const canvas = canvasRef.current!
@@ -67,69 +47,32 @@ export default function ParticleViewer({ config, style, className }: Props) {
     } = config
     const holdNextSecs = (config as { morphHoldNext?: number }).morphHoldNext ?? 2.8
 
-    const farRgb = hexToRgb(config.colorFar ?? '#050810')
+    const activeColorFar = isDark ? (config.colorFar ?? '#000000') : '#FAFAFA'
+    const activeColors = isDark
+      ? colors
+      : ['#111827', '#374151', '#4B5563', '#6B7280', '#000000']
+
+    const farRgb = hexToRgb(activeColorFar)
     const dpr = Math.min(window.devicePixelRatio || 1, 2)
 
-    // Spring chase rates (per frame): EASE at rest, MORPH_EASE while a morph
-    // is in flight. THIS was why fast timelines felt sluggish — the blend
-    // finished on schedule, but at 0.055 the dots were still drifting toward
-    // it long after, smearing every 2.8s step into the next. During a morph
-    // (and a short tail after) the spring now chases ~3× harder so shapes
-    // LAND on their timestamp, then relaxes back for the buttery hold drift.
     const HOLD_EASE = config.holdEase ?? 0.055
     const MORPH_EASE = config.morphEase ?? 0.17
-    let snapEnv = 0        // 1 while morphing, decays after → blends the two rates
+    let snapEnv = 0
     const FOV = 3.0
 
-    // ── Song-position clock ─────────────────────────────────────────────
     let audioEl: HTMLAudioElement | null = null
     function getSongTime(): number {
       if (!audioEl) audioEl = document.getElementById('mp-audio') as HTMLAudioElement | null
       return audioEl?.currentTime ?? 0
     }
 
-    // ── Timeline (site.config.ts-authored) vs legacy cycle ─────────────
-    const timeline: ShapeTimelineEntry[] | null =
-      config.timeline && config.timeline.length > 0
-        ? [...config.timeline].sort((a, b) => a.at - b.at)
-        : null
-    const lastSeg = timeline ? timeline.length - 1 : 0
+    const shapeNameAt = (i: number): ShapeName => shapes[i % shapes.length]
+    const colorHexAt = (i: number): string => activeColors[i % activeColors.length]
 
-    /** Shape name for a resolved index (timeline entries clamp at the end;
-     *  legacy mode cycles through the shapes array). */
-    const shapeNameAt = (i: number): ShapeName =>
-      timeline ? timeline[Math.min(i, lastSeg)].shape : shapes[i % shapes.length]
-    const colorHexAt = (i: number): string =>
-      (timeline && timeline[Math.min(i, lastSeg)].color) ?? colors[i % colors.length]
-
-    // Legacy cycle constants
     const FIRST_CYCLE_S = morphHoldSecs + morphDurSecs
     const LATER_CYCLE_S = holdNextSecs + morphDurSecs
 
-    // Timeline cursor — O(1) amortized per frame
-    let segCursor = 0
-    let lastSongT = 0
-
-    /** Pure w.r.t. song time (cursor is just a cache): resolves the shape
-     *  we're holding-on-or-morphing-FROM and the morph progress. In timeline
-     *  mode, the morph into entry k+1 fills the morphDuration seconds BEFORE
-     *  timeline[k+1].at, so each shape is fully formed exactly at its own
-     *  timestamp. */
     function resolveMorphState(t: number): { baseIdx: number; morphT: number } {
-      if (timeline) {
-        if (t < lastSongT - 0.25) segCursor = 0          // loop wrap / seek back
-        lastSongT = t
-        while (segCursor > 0 && t < timeline[segCursor].at) segCursor--
-        while (segCursor < lastSeg && t >= timeline[segCursor + 1].at) segCursor++
-        const next = timeline[segCursor + 1]
-        if (!next) return { baseIdx: segCursor, morphT: 0 }
-        const start = Math.max(next.at - morphDurSecs, timeline[segCursor].at)
-        const denom = next.at - start
-        if (denom <= 0) return { baseIdx: segCursor, morphT: 1 }
-        if (t < start) return { baseIdx: segCursor, morphT: 0 }
-        return { baseIdx: segCursor, morphT: (t - start) / denom }
-      }
-      // Legacy cycle mode (section configs without a timeline)
       if (t < morphHoldSecs) return { baseIdx: 0, morphT: 0 }
       if (t < FIRST_CYCLE_S) return { baseIdx: 0, morphT: (t - morphHoldSecs) / morphDurSecs }
       const rel = t - FIRST_CYCLE_S
@@ -140,11 +83,14 @@ export default function ParticleViewer({ config, style, className }: Props) {
       return { baseIdx, morphT: (within - holdNextSecs) / morphDurSecs }
     }
 
-    // ── Camera / morph state ───────────────────────────────────────────────
     let orbitT = 0
-    const ORBIT_SPEED = 0.0004
-    let dragRy = 0, dragRx = 0
-    let drag = false, lx = 0, ly = 0, raf = 0
+    const ORBIT_SPEED = config.autoRotateSpeed ?? 0.0004
+    const dragRy = 0, dragRx = 0
+    const drag = false
+    let raf = 0
+
+    let waveTime = 0
+    const WAVE_SPEED = 0.002
 
     const initial = resolveMorphState(getSongTime())
     let curIdx = initial.baseIdx
@@ -153,20 +99,15 @@ export default function ParticleViewer({ config, style, className }: Props) {
     let cRgb = hexToRgb(colorHexAt(curIdx))
     let nRgb = hexToRgb(colorHexAt(curIdx + 1))
 
-    // Pre-sample upcoming shapes during idle time so morphs never hitch.
-    // In timeline mode indices past the last entry are skipped (they'd just
-    // clamp to a shape that's already cached anyway).
     const idle: (cb: () => void) => void =
       'requestIdleCallback' in window
         ? cb => (window as unknown as { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(cb)
         : cb => { setTimeout(cb, 0) }
     const warm = (idx: number) => {
-      if (timeline && idx > lastSeg) return
       idle(() => { sampleShape(shapeNameAt(idx), n) })
     }
     warm(curIdx + 2)
 
-    // ── Per-particle buffers (allocated once) ──────────────────────────────
     const px = new Float32Array(n)
     const py = new Float32Array(n)
     const pz = new Float32Array(n)
@@ -179,7 +120,6 @@ export default function ParticleViewer({ config, style, className }: Props) {
     })
     const pclass = Uint8Array.from({ length: n }, () => (Math.random() * 3) | 0)
 
-    // Counting-sort scratch
     const dotBucket = new Uint8Array(n)
     const counts = new Uint32Array(DOT_B)
     const bStart = new Uint32Array(DOT_B)
@@ -187,7 +127,6 @@ export default function ParticleViewer({ config, style, className }: Props) {
     const sorted = new Uint32Array(n)
     let lineScratch = new Uint8Array(1024)
 
-    // ── Cached styles — rebuilt only when the foreground color changes ─────
     let lutFgKey = -1
     const dotStyle = new Array<string>(DOT_B * 3)
     const dimStyle = new Array<string>(DOT_B)
@@ -197,6 +136,7 @@ export default function ParticleViewer({ config, style, className }: Props) {
     const lineBl = new Uint8Array(LINE_B)
     const LINE_ALPHA = new Float32Array(LINE_B)
     const LINE_W = new Float32Array(LINE_B)
+
     for (let b = 0; b < LINE_B; b++) {
       const tD = (b + 0.5) / LINE_B
       LINE_ALPHA[b] = Math.pow(tD, 1.5) * 0.52
@@ -224,7 +164,6 @@ export default function ParticleViewer({ config, style, className }: Props) {
       }
     }
 
-    // Bloom gradient cache
     let bloomGrad: CanvasGradient | null = null
     let bloomKey = ''
 
@@ -240,39 +179,40 @@ export default function ParticleViewer({ config, style, className }: Props) {
     const ro = new ResizeObserver(resize)
     ro.observe(canvas)
 
-    // ── Visibility: fully stop the loop when scrolled off-screen ──────────
+    let disposed = false
     let visible = true, rafActive = false
     const io = new IntersectionObserver(entries => {
       visible = entries[0].isIntersecting
-      if (visible && !rafActive) {
+      if (visible && !rafActive && !disposed) {
         rafActive = true
         raf = requestAnimationFrame(draw)
       }
     })
     io.observe(canvas)
 
-    /** Batched wireframe pass for one shape's line set, at a crossfade weight. */
-    function drawLineSet(lines: Uint32Array, weight: number, scale: number) {
+    // cullLong = false keeps long segments (needed for the stretched wave, whose
+    // strand segments get longer than the normal cull threshold on wide screens).
+    function drawLineSet(lines: Uint32Array, weight: number, scale: number, cullLong = true) {
       const L = lines.length >> 1
       if (weight < 0.04 || L === 0) return
       if (lineScratch.length < L) lineScratch = new Uint8Array(L)
       const longLen2 = (scale * 0.18) * (scale * 0.18)
 
-      // Pass 1: cull + classify into depth buckets
       for (let li = 0; li < L; li++) {
         const ia = lines[li * 2], ib = lines[li * 2 + 1]
         if (ia >= n || ib >= n) { lineScratch[li] = 255; continue }
         const za = pz[ia], zb = pz[ib]
         if (za > 0.5 && zb > 0.5) { lineScratch[li] = 255; continue }
         const zmid = (za + zb) * 0.5
-        const dx = px[ia] - px[ib], dy = py[ia] - py[ib]
-        if (dx * dx + dy * dy > longLen2 && zmid > -0.1) { lineScratch[li] = 255; continue }
+        if (cullLong) {
+          const dx = px[ia] - px[ib], dy = py[ia] - py[ib]
+          if (dx * dx + dy * dy > longLen2 && zmid > -0.1) { lineScratch[li] = 255; continue }
+        }
         const tD = clamp((-zmid + 0.5) / 1.5, 0, 1)
         let b = (tD * LINE_B) | 0
         if (b >= LINE_B) b = LINE_B - 1
         lineScratch[li] = LINE_ALPHA[b] * weight < 0.012 ? 255 : b
       }
-      // Pass 2: one stroke per bucket
       for (let b = 0; b < LINE_B; b++) {
         let any = false
         ctx.beginPath()
@@ -291,38 +231,62 @@ export default function ParticleViewer({ config, style, className }: Props) {
     }
 
     function draw() {
-      if (!visible) { rafActive = false; return }
+      if (disposed || !visible) { rafActive = false; return }
       raf = requestAnimationFrame(draw)
+
+      waveTime += WAVE_SPEED
 
       ctx.clearRect(0, 0, cw, ch)
       const cx = cw / 2, cy = ch / 2, scale = Math.min(cw, ch) * 0.38
 
-      // Orbital camera — always alive, even when paused
-      orbitT += drag ? ORBIT_SPEED * 0.3 : ORBIT_SPEED
-      const fRy = orbitT * TAU + dragRy
-      const fRx = Math.sin(orbitT * TAU) * 0.52 + dragRx
+      // Wave length in world units so that it spans the FULL canvas width.
+      // Divide by the smallest perspective factor (deepest point) so even the
+      // back of the wave reaches both edges, then add a little bleed.
+      const waveStretch = cw > 0
+        ? (cw / scale) * ((FOV + WAVE_Z_MAX) / FOV) * WAVE_BLEED
+        : 5.0
 
-      // ── Morph state — resolved directly from the song's actual position ──
+      orbitT += drag ? ORBIT_SPEED * 0.3 : ORBIT_SPEED
+
+      const rawFRy = orbitT * TAU + dragRy
+      const rawFRx = Math.sin(orbitT * TAU) * 0.52 + dragRx
+
       const { baseIdx, morphT: rawMorphT } = resolveMorphState(getSongTime())
+
+      const curIsWave = shapeNameAt(baseIdx) === 'wave'
+      const nxtIsWave = shapeNameAt(baseIdx + 1) === 'wave'
+
+      const st = smoothstep(clamp(rawMorphT, 0, 1))
+      const inv = 1 - st
+
+      let waveLock = 0
+      if (curIsWave && nxtIsWave) waveLock = 1
+      else if (curIsWave) waveLock = inv
+      else if (nxtIsWave) waveLock = st
+
+      const fRy = lerp(rawFRy, 0, waveLock)
+      const fRx = lerp(rawFRx, 0.12, waveLock)
+
       if (baseIdx !== curIdx) {
         if (baseIdx === curIdx + 1) {
           cur = nxt; cRgb = nRgb
         } else {
-          // mid-song mount, a loop wrap, a seek, or a long pause — jump there
-          cur = sampleShape(shapeNameAt(baseIdx), n)
+          cur = curIsWave
+            ? sampleShape('wave', n, waveTime, waveStretch)
+            : sampleShape(shapeNameAt(baseIdx), n)
           cRgb = hexToRgb(colorHexAt(baseIdx))
         }
-        nxt = sampleShape(shapeNameAt(baseIdx + 1), n)
+        nxt = nxtIsWave
+          ? sampleShape('wave', n, waveTime, waveStretch)
+          : sampleShape(shapeNameAt(baseIdx + 1), n)
         nRgb = hexToRgb(colorHexAt(baseIdx + 1))
         warm(baseIdx + 2)
         curIdx = baseIdx
       }
 
-      const st = smoothstep(clamp(rawMorphT, 0, 1))
-      const inv = 1 - st
-      // Snap envelope: pinned to 1 while a morph is in flight, then decays
-      // over ~10 frames so dots finish settling fast before relaxing back
-      // to the floaty hold spring.
+      if (curIsWave) cur = sampleShape('wave', n, waveTime, waveStretch)
+      if (nxtIsWave) nxt = sampleShape('wave', n, waveTime, waveStretch)
+
       snapEnv = st > 0 && st < 1 ? 1 : snapEnv * 0.82
       const EASE = HOLD_EASE + (MORPH_EASE - HOLD_EASE) * snapEnv
       const fg: [number, number, number] = [
@@ -333,11 +297,11 @@ export default function ParticleViewer({ config, style, className }: Props) {
       const fgKey = (fg[0] << 16) | (fg[1] << 8) | fg[2]
       if (fgKey !== lutFgKey) { rebuildLUT(fg); lutFgKey = fgKey; bloomKey = '' }
 
-      // ── Fused loop: interp → rotY → rotX → project → spring → bucket ────
       const cosY = Math.cos(fRy), sinY = Math.sin(fRy)
       const cosX = Math.cos(fRx), sinX = Math.sin(fRx)
       const A = cur.positions, Bp = nxt.positions
       counts.fill(0)
+
       for (let i = 0; i < n; i++) {
         const j = i * 3
         let x: number, y: number, z: number
@@ -364,11 +328,11 @@ export default function ParticleViewer({ config, style, className }: Props) {
         dotBucket[i] = b
         counts[b]++
       }
+
       let acc = 0
       for (let b = 0; b < DOT_B; b++) { bStart[b] = acc; cursor[b] = acc; acc += counts[b] }
       for (let i = 0; i < n; i++) sorted[cursor[dotBucket[i]]++] = i
 
-      // ── Bloom (cached gradient) ─────────────────────────────────────────
       const br = scale * 1.6
       const key = `${fgKey}:${cw}x${ch}`
       if (key !== bloomKey || !bloomGrad) {
@@ -382,11 +346,9 @@ export default function ParticleViewer({ config, style, className }: Props) {
       ctx.beginPath(); ctx.arc(cx, cy, br, 0, TAU)
       ctx.fillStyle = bloomGrad; ctx.fill()
 
-      // ── Wireframes: crossfade outgoing → incoming topology ──────────────
-      drawLineSet(cur.lines, inv, scale)
-      drawLineSet(nxt.lines, st, scale)
+      drawLineSet(cur.lines, inv, scale, !curIsWave)
+      drawLineSet(nxt.lines, st, scale, !nxtIsWave)
 
-      // ── Dots — near buckets first, far on top (matches v1 draw order) ───
       for (let b = DOT_B - 1; b >= 0; b--) {
         const s0 = bStart[b], s1 = s0 + counts[b]
         if (s0 === s1) continue
@@ -394,7 +356,6 @@ export default function ParticleViewer({ config, style, className }: Props) {
         const persp = 0.7 + tDb * 0.3
 
         if (tDb < 0.15) {
-          // Very far: dim, shrunken, one batch
           ctx.beginPath()
           for (let si = s0; si < s1; si++) {
             const i = sorted[si]
@@ -407,7 +368,6 @@ export default function ParticleViewer({ config, style, className }: Props) {
           continue
         }
 
-        // Soft halo around large near dots
         if (tDb > 0.65) {
           let any = false
           ctx.beginPath()
@@ -421,7 +381,6 @@ export default function ParticleViewer({ config, style, className }: Props) {
           if (any) { ctx.fillStyle = haloStyle[b]; ctx.fill() }
         }
 
-        // Main dots, batched per alpha class: one path + one fill each
         for (let c = 0; c < 3; c++) {
           let any = false
           ctx.beginPath()
@@ -438,35 +397,21 @@ export default function ParticleViewer({ config, style, className }: Props) {
       }
     }
 
-    rafActive = true
-    raf = requestAnimationFrame(draw)
-
-    const onDown = (e: PointerEvent) => { drag = true; lx = e.clientX; ly = e.clientY }
-    const onMove = (e: PointerEvent) => {
-      if (!drag) return
-      dragRy += (e.clientX - lx) * 0.004
-      dragRx += (e.clientY - ly) * 0.004
-      lx = e.clientX; ly = e.clientY
-    }
-    const onUp = () => { drag = false }
-
-    canvas.addEventListener('pointerdown', onDown)
-    window.addEventListener('pointermove', onMove)
-    window.addEventListener('pointerup', onUp)
-
+    // Stop this loop when config/theme changes or the component unmounts,
+    // otherwise an old loop keeps drawing over the new one.
     return () => {
+      disposed = true
       cancelAnimationFrame(raf)
       ro.disconnect()
       io.disconnect()
-      canvas.removeEventListener('pointerdown', onDown)
-      window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('pointerup', onUp)
     }
-  }, [config])
+  }, [config, isDark])
 
   return (
-    <canvas ref={canvasRef} className={className}
-      style={{ display: 'block', width: '100%', height: '100%', cursor: 'grab', touchAction: 'none', ...style }}
-    />
+    <div style={{ background: isDark ? '#000000' : '#FAFAFA', width: '100%', height: '100%' }}>
+      <canvas ref={canvasRef} className={className}
+        style={{ display: 'block', width: '100%', height: '100%', touchAction: 'none', ...style }}
+      />
+    </div>
   )
 }
