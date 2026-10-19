@@ -99,6 +99,13 @@
       document.body.style.background = "transparent";
     }
   </script>
+  <!-- Pushes one AdSense unit; called by lib/core/ads (round 23). -->
+  <script>
+    window.clasherPushAd = function () {
+      try { (window.adsbygoogle = window.adsbygoogle || []).push({}); }
+      catch (e) { console.warn("AdSense", e); }
+    };
+  </script>
 </head>
 <body>
   <picture id="splash">
