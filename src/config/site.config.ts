@@ -1181,6 +1181,158 @@ export const projects: ProjectConfig[] = [
   },
 
   {
+    slug: "edusync-platform",
+    name: "EduSync",
+    tagline: "A comprehensive education management, intelligent scheduling, and academic tracking system for modern institutions and students.",
+    year: "2026",
+    platform: "Web",
+    status: "In Development",
+    tech: ["Flutter", "Dart"],
+    label: "Web App · 2026",
+    appIconPath: "/icons/edusync.png",
+    coverImage: "/icons/edusync.png",
+
+    about: [
+      "A Flutter web app designed specifically for educators, students, and academic administrators to seamlessly manage daily schedules and track academic progress. Built to handle everything from individual study routines to campus-wide class deployments, it streamlines the friction of academic organization.",
+      "Features include dynamic weekly timetables, automated assignment deadline tracking, and a secure grading system that calculates student performance metrics over time. Built with BLoC state management and Clean Architecture to ensure rock-solid performance during peak usage hours like exam weeks and registration periods.",
+      "Administrators and teachers can manage curriculum delivery from a central dashboard, while students can view live schedule changes, upcoming deadlines, and personal academic histories directly from their own devices in real-time."
+    ],
+
+    features: [
+      "Dynamic visual timetables with collision detection for schedule conflicts",
+      "Automated deadline tracking, reminders, and calendar synchronization",
+      "Live interactive gradebooks that students and parents can view in real-time",
+      "Persistent student profiles with GPA and performance analytics",
+      "Secure assignment submission and digital resource sharing",
+      "Automated attendance logging and absence reporting",
+      "Mobile-optimized dashboard designed for on-the-go students and faculty"
+    ],
+
+    stackNotes: [
+      "Flutter web frontend",
+      "Real-time database syncing across devices",
+      "Proprietary stack configuration for secure academic records and role-based access control"
+    ],
+
+    // To add store listings later, uncomment and populate this block:
+    // stores: {
+    //   googlePlay: "https://play.google.com/store/apps/details?id=...",
+    //   appStore: "https://apps.apple.com/app/..."
+    // },
+    hasAuthPages: true,
+    hasEmailConfirmation: true,
+    hasPasswordReset: true,
+    build: { web: '/builds/eduro/index.html' },
+    storeNote: "Public build, in active development.",
+    legalNote: "Accounts are required for students, faculty, and administrators. We collect academic and profile data necessary for institutional operations but zero data for targeted advertising. Educational records are protected under standard privacy frameworks.",
+    theme: {
+      accent: '#0ea5e9' // A professional academic blue
+    },
+    privacy: {
+      updated: "October 26, 2026",
+      contact: "privacy@stateless-labs.com",
+      collectsData: true,
+      androidPermission: false,
+      summaryOverride: "We only collect the data necessary to manage academic schedules, secure educational records, and facilitate classroom communication. We do not collect, sell, or share any student or faculty data for targeted advertising.",
+      dataCollected: [
+        "Email address",
+        "Full name and student/faculty ID",
+        "Profile images",
+        "Academic schedules, grades, and submissions",
+        "Core authentication and security logs"
+      ]
+    },
+
+    terms: {
+      updated: "October 26, 2026",
+      contact: "legal@stateless-labs.com",
+      hasAccounts: true,
+      extraClauses: [
+        {
+          title: "Acceptance of Terms and Legal Compliance",
+          body: [
+            "By accessing, registering for, or using this application, the user explicitly agrees to be bound by all conditions and terms outlined in this document.",
+            "Regardless of the language in which these terms are presented, translated, or read, by accepting them, the user acknowledges that they have fully read, completely understood, and agreed to all terms and conditions herein.",
+            "Users are strictly subject to, and must comply with, all local, state, and national education and privacy laws (such as FERPA or GDPR) in their jurisdiction. Any violation of applicable laws will result in an immediate and permanent ban.",
+            "The application, its developers, and operators take absolutely no responsibility for the actions, conduct, or legal violations of its users or participating institutions."
+          ]
+        },
+        {
+          title: "Academic Integrity and Account Rules",
+          body: [
+            "Any misconduct intended to manipulate academic records will result in an immediate and permanent ban. This includes intentionally altering grades, forging submissions, or exploiting system mechanics to bypass deadlines.",
+            "Sharing account credentials to facilitate cheating or unauthorized access to academic materials is strictly prohibited. If an account is caught participating in these activities, it will be suspended and reported to the respective academic institution."
+          ]
+        },
+        {
+          title: "App Purpose and Institutional Independence",
+          body: [
+            "This application is strictly provided as a software tool for managing education schedules and records. We are not an accredited educational institution and do not grant degrees, diplomas, or official academic credits.",
+            "Institutions using this platform are solely responsible for the validity of the education provided and for ensuring their curriculums comply with local accreditation boards."
+          ]
+        },
+        {
+          title: "Platform Neutrality and Academic Disputes",
+          body: [
+            "This platform operates as a neutral software provider. We do not mediate, arbitrate, or assume liability for grading disputes, disciplinary actions, or conflicts between students, parents, and educators.",
+            "Weaponizing the platform’s communication or reporting systems to maliciously attack, harass, or cyberbully other students or faculty is strictly prohibited and will result in immediate bans."
+          ]
+        },
+        {
+          title: "Content Guidelines and Bannable Offenses",
+          body: [
+            "Users are strictly prohibited from uploading or displaying sexual, explicit, discriminatory, or highly objectionable imagery or text in any assignments, profiles, or public forums.",
+            "Uploading malicious files, unauthorized copyrighted material, or using the platform to distribute illicit content will result in an immediate and permanent ban."
+          ]
+        },
+        {
+          title: "Resource Sharing Rules and Suspensions",
+          body: [
+            "Maintaining a fair academic environment is required. If an account is repeatedly flagged for selling completed assignments, distributing exam answers, or scamming peers, the account will be immediately suspended.",
+            "Suspended users must go through a formal appeal process with their institution's administration and our support team to have access reinstated."
+          ]
+        },
+        {
+          title: "Institution Conduct and Verification",
+          body: [
+            "Educational organizations are held to a higher standard of data protection. Institutions found guilty of mishandling student data, violating privacy laws, or abusing administrative privileges will be banned and stripped of their verification status on the platform.",
+            "Administrative abuse includes, but is not limited to, unauthorized mass data scraping, selling student contact lists, or failing to secure institutional access points."
+          ]
+        },
+        {
+          title: "Right to Terminate and Indemnification",
+          body: [
+            "We reserve the right to suspend, terminate, or refuse service to any user or institution at any time, for any reason, without prior notice or liability, particularly in cases of security breaches.",
+            "By using this app, you agree to indemnify and hold harmless Stateless Labs from any claims, damages, or legal fees arising from your use of the platform, violation of these terms, or academic conflicts."
+          ]
+        },
+        {
+          title: "Global Limitation of Liability",
+          body: [
+            "The developers and operators of this application assume no responsibility or liability for user interactions, the quality of education delivered, or user-generated content.",
+            "While operating globally, users and institutions access the application at their own risk, and we disclaim all warranties, express or implied, to the maximum extent permitted by law regarding uptime during critical academic periods."
+          ]
+        }
+      ]
+    },
+
+    cookies: {
+      updated: "October 26, 2026",
+      contact: "privacy@stateless-labs.com",
+      usesCookies: false,
+      summaryOverride: "This app does not use cookies for tracking or targeted advertising.",
+      localStorageUse: [
+        "We only use local browser storage to keep you logged in securely and to save offline caches of your upcoming timetable and drafted assignments."
+      ]
+    },
+
+    deletion: {
+      identifierLabel: "Email address or Student ID",
+      extraNote: "Upon request, your account will be deleted within 30 business days. Note: If your account is managed by an educational institution, official academic records may be retained by the school in compliance with local education laws regardless of app deletion."
+    }
+  },
+
+  {
     slug: 'project-vault',
     name: 'Project Vault',
     tagline: 'Fast, distraction free email on mobile.',
