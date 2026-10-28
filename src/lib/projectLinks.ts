@@ -43,12 +43,68 @@ export function hidesLinks(visibility?: ProjectVisibility): boolean {
     return !!visibility && LINK_HIDING_VISIBILITY.has(visibility)
 }
 
+/**
+ * Schemes a project link is allowed to use.
+ *
+ * `javascript:` is the one that matters. React does not block it in an href,
+ * so `build: { web: 'javascript:fetch(...)' }` becomes script execution in the
+ * visitor's session the moment someone clicks the button, and it would be
+ * rendered as the primary call to action on the detail page.
+ *
+ * Config is author-controlled, so this is defence in depth rather than a live
+ * hole. It is worth having because hrefs get pasted from issue trackers and
+ * chat messages, a bare `data:text/html,...` is a phishing surface, and the
+ * cost of the check is one indexOf.
+ *
+ * A custom app scheme like `blinko://reset` is allowed on purpose: handing off
+ * to a native app is a real thing these links do.
+ */
+const BLOCKED_SCHEMES = ['javascript:', 'data:', 'vbscript:', 'file:', 'blob:']
+
+/**
+ * Are we in a dev build?
+ *
+ * `import.meta.env.DEV` is a Vite thing, and TypeScript only knows about it if
+ * the project pulls in Vite's client types. If it does not you get
+ * "Property 'env' does not exist on type 'ImportMeta'", which is what happened
+ * here. The cast makes this file compile either way, and the optional chaining
+ * means it also returns false under Jest, Vitest in node mode, or anything
+ * else that does not define `import.meta.env` at all.
+ *
+ * The project-wide fix, worth doing separately: a file at src/vite-env.d.ts
+ * containing exactly
+ *
+ *     /// <reference types="vite/client" />
+ *
+ * after which `import.meta.env` is typed everywhere and you can use it
+ * directly. This local cast is here so one warning line does not depend on
+ * that.
+ */
+function isDev(): boolean {
+    return (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true
+}
+
 /** Real link, or a placeholder someone has not filled in yet. */
 export function isRealHref(href?: string): href is string {
     if (!href) return false
     const h = href.trim()
     if (!h || h === '#') return false
     if (h.toUpperCase().startsWith('REPLACE_')) return false
+
+    // Strip the characters a browser ignores before parsing the scheme, so
+    // `java\tscript:` and ` JavaScript:` cannot slip past a plain startsWith.
+    // Control characters below 0x20 are dropped by the URL parser; so are
+    // leading spaces.
+    const probe = h.replace(/[\u0000- ]/g, '').toLowerCase()
+    if (BLOCKED_SCHEMES.some(scheme => probe.startsWith(scheme))) {
+        if (isDev()) {
+            console.warn(
+                `[projectLinks] Refusing a link with a blocked scheme: ${h.slice(0, 60)}`,
+            )
+        }
+        return false
+    }
+
     return true
 }
 

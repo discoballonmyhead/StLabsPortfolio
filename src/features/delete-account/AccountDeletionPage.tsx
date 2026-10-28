@@ -21,7 +21,12 @@
  *   identifier  whatever they typed in the email field
  *   reason      optional, or a placeholder when left blank
  *   timestamp   ISO, generated client side
- *   userAgent   browser string, useful when a request looks automated
+ *   source      'standalone', so the sheet can tell the two forms apart
+ *
+ *   No user agent, no fingerprint, nothing else. Collecting extra identifying
+ *   data from someone exercising a privacy right is the wrong instinct, and
+ *   none of it is needed to action a deletion. If your sheet still has a
+ *   userAgent column, delete it.
  *
  * THE DROPDOWN
  *   A native select cannot show an icon per option, so this is a real listbox.
@@ -429,6 +434,26 @@ export default function AccountDeletionPage() {
     const [focused, setFocused] = useState<string | null>(null)
     const [touched, setTouched] = useState(false)
 
+    // Bot guards, see the note above handleSubmit.
+    const [honeypot, setHoneypot] = useState('')
+    const mountedAt = useRef(Date.now())
+
+    // ── Abuse limits ─────────────────────────────────────────────────────────
+    // The endpoint is public by design: a deletion form that required an
+    // account would be useless to someone locked out of theirs. That means
+    // anything posted here lands in the sheet unfiltered, so the limits have
+    // to be here.
+    //
+    // MAX_REASON    the field had no cap at all, so a script could post
+    //               megabytes into a single cell and make the sheet unusable
+    // MIN_FILL_MS   a human cannot read the warning, pick an app, type an
+    //               address and tick the box in under two seconds
+    // honeypot      a field positioned off-screen and hidden from the
+    //               accessibility tree, so no real person ever fills it in
+    const MAX_REASON = 600
+    const MAX_IDENTIFIER = 254   // RFC 5321 maximum for an email address
+    const MIN_FILL_MS = 2000
+
     const busy = state === 'submitting'
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier.trim())
     const valid = !!app && emailOk && confirm
@@ -438,19 +463,31 @@ export default function AccountDeletionPage() {
         setTouched(true)
         if (!valid || busy) return
 
+        // Silent drops. Both of these mean "not a person", and a bot that is
+        // told why it failed just fixes it and comes back.
+        if (honeypot !== '') { setState('success'); return }
+        if (Date.now() - mountedAt.current < MIN_FILL_MS) { setState('success'); return }
+
         setState('submitting')
         setErrorMsg('')
+
+        // no-cors gives an opaque response, so there is nothing to await
+        // meaningfully and a stalled request would otherwise leave the button
+        // spinning forever. 12s then give up and offer the email fallback.
+        const abort = new AbortController()
+        const timeout = window.setTimeout(() => abort.abort(), 12000)
 
         try {
             const body = new URLSearchParams({
                 app: app!.name,
                 slug: app!.slug,
-                identifier: identifier.trim(),
-                reason: reason.trim() || 'No reason provided',
+                identifier: identifier.trim().slice(0, MAX_IDENTIFIER),
+                reason: reason.trim().slice(0, MAX_REASON) || 'No reason provided',
                 timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent,
-                // Ignored by the current script. Add a Source column to
-                // deletion-script.gs if you want to tell the two forms apart.
+                // userAgent was being sent on every request. It is
+                // fingerprinting data that is not needed to action a deletion,
+                // and collecting extra identifiers from someone exercising a
+                // privacy right is the wrong instinct. Dropped.
                 source: 'standalone',
             })
 
@@ -459,15 +496,19 @@ export default function AccountDeletionPage() {
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: body.toString(),
+                signal: abort.signal,
+                referrerPolicy: 'no-referrer',
             })
 
-            // no-cors means the response is opaque, so a request that did not throw
-            // is treated as delivered. The Executions tab in Apps Script is the only
-            // reliable place to confirm it landed.
+            // Opaque response: a request that did not throw is treated as
+            // delivered. Executions in the Apps Script editor is the only
+            // place a failure is actually visible.
             setState('success')
         } catch {
             setState('error')
             setErrorMsg('The request could not be sent. Check your connection and try again, or email us directly.')
+        } finally {
+            window.clearTimeout(timeout)
         }
     }
 
@@ -630,6 +671,7 @@ export default function AccountDeletionPage() {
                                     onBlur={() => setFocused(null)}
                                     disabled={busy}
                                     required
+                                    maxLength={MAX_IDENTIFIER}
                                     style={inputStyle(focused === 'id', busy)}
                                 />
                                 <p style={{ fontSize: '11.5px', color: 'var(--text-ghost, #4e4e4e)', margin: '7px 0 0', lineHeight: 1.6 }}>
@@ -659,7 +701,50 @@ export default function AccountDeletionPage() {
                                     onFocus={() => setFocused('reason')}
                                     onBlur={() => setFocused(null)}
                                     disabled={busy}
+                                    maxLength={MAX_REASON}
                                     style={{ ...inputStyle(focused === 'reason', busy), resize: 'vertical', minHeight: '84px' }}
+                                />
+                                {reason.length > MAX_REASON - 100 && (
+                                    <p style={{
+                                        fontSize: '11px',
+                                        color: 'var(--text-ghost, #4e4e4e)',
+                                        margin: '6px 0 0',
+                                        textAlign: 'right',
+                                    }}>
+                                        {MAX_REASON - reason.length} characters left
+                                    </p>
+                                )}
+                            </div>
+
+                            {/*
+                              Honeypot. Positioned off-screen rather than
+                              display:none, because some bots skip anything
+                              that computes to hidden. aria-hidden plus
+                              tabIndex -1 keeps it out of the accessibility
+                              tree and out of the tab order, so nobody using a
+                              screen reader or keyboard ever lands on it.
+                              autoComplete off stops a password manager
+                              helpfully filling it in and tripping the guard.
+                            */}
+                            <div
+                                aria-hidden="true"
+                                style={{
+                                    position: 'absolute',
+                                    left: '-9999px',
+                                    width: '1px',
+                                    height: '1px',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                <label htmlFor="del-company-url">Company website</label>
+                                <input
+                                    id="del-company-url"
+                                    name="company_url"
+                                    type="text"
+                                    tabIndex={-1}
+                                    autoComplete="off"
+                                    value={honeypot}
+                                    onChange={e => setHoneypot(e.target.value)}
                                 />
                             </div>
 

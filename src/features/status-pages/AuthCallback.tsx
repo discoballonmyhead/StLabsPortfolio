@@ -44,7 +44,7 @@
  * deep link into your app if you would rather hand off immediately.
  */
 
-import { lazy, Suspense, useMemo } from 'react'
+import { lazy, Suspense, useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import { projects } from '@/config'
 import type { StatusPageType } from '@/config'
@@ -136,7 +136,46 @@ export default function AuthCallback({ slug }: Props) {
 
     const status = pickStatus(outcome)
 
+    // ── Scrub the credentials out of the URL ────────────────────────────────
+    // Supabase hands the result over in the address bar: ?code=... on PKCE,
+    // #access_token=...&refresh_token=... on implicit. Once readOutcome has
+    // read them they are of no further use to this page, and leaving them
+    // there costs real things:
+    //
+    //   Referer leakage. The QUERY STRING is sent in the Referer header on
+    //     every cross-origin subresource the page loads. This site pulls
+    //     fonts from fonts.googleapis.com, so a single-use auth code was
+    //     being handed to a third party on page load.
+    //
+    //   History. The token sits in session history, so Back returns to a URL
+    //     that still carries it, and it lands in any synced browser history.
+    //
+    //   Sharing. "It says my link expired, here's the URL" is a normal thing
+    //     for someone to send to support. On the implicit flow that message
+    //     contains a live refresh token.
+    //
+    // replaceState rewrites the entry in place, so there is no new history
+    // entry and no navigation. The flow has already been decided above, and
+    // the effect depends on `status`, so a later real navigation still works.
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+        if (!window.location.search && !window.location.hash) return
+        try {
+            window.history.replaceState(
+                window.history.state,
+                '',
+                window.location.pathname,
+            )
+        } catch {
+            // Some embedded webviews refuse replaceState. Not fatal: the page
+            // still renders the right status, the URL just stays dirty.
+        }
+    }, [status])
+
     // Optional hand off straight into a native app on a good recovery link.
+    // Only ever a hardcoded constant above, never a value read from the URL,
+    // because taking a redirect target from a query parameter is how you build
+    // an open redirect into your own auth flow.
     if (recoveryRedirect && outcome.ok && outcome.flow === 'recovery') {
         window.location.replace(recoveryRedirect)
         return null

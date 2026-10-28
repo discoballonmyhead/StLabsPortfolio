@@ -41,11 +41,19 @@ export default function ParticleViewer({ config, style, className }: Props) {
 
     const {
       shapes, colors,
-      particleCount: n = 700,
-      morphHold: morphHoldSecs = 3.0,
-      morphDuration: morphDurSecs = 1.5,
+      particleCount: n = 500,
+      morphHold: rawHoldSecs = 3.0,
+      morphDuration: rawDurSecs = 1.5,
     } = config
-    const holdNextSecs = (config as { morphHoldNext?: number }).morphHoldNext ?? 2.8
+    const holdNextSecs = Math.max(0.1, config.morphHoldNext ?? 2.5)
+
+    // morphDuration must never be 0: resolveMorphState divides by it. The old
+    // hero config shipped morphDuration: 0 and only avoided the divide because
+    // morphHold was 99999, so the branch was unreachable. Floor it here so a
+    // bad config degrades to a fast morph instead of producing Infinity and
+    // freezing every particle at NaN.
+    const morphDurSecs = Math.max(0.05, rawDurSecs)
+    const morphHoldSecs = Math.max(0, rawHoldSecs)
 
     const activeColorFar = isDark ? (config.colorFar ?? '#000000') : '#FAFAFA'
     const activeColors = isDark
@@ -60,10 +68,32 @@ export default function ParticleViewer({ config, style, className }: Props) {
     let snapEnv = 0
     const FOV = 3.0
 
+    // ── The clock ────────────────────────────────────────────────────────────
+    // 'song' reads the real playback position off the music player, so shapes
+    // advance with the track and hold still while it is paused. The <audio>
+    // element loops, so currentTime returns to 0 at the end of the track and
+    // the sequence starts over on its own.
+    //
+    // The lookup is retried until it succeeds rather than cached as null,
+    // because this viewer can mount before MusicPlayer does. Caching the miss
+    // was what left the hero frozen on the logo.
+    //
+    // If the page genuinely has no player, song time would sit at 0 forever
+    // and nothing would ever morph, so that case falls through to wall time.
+    const useSongClock = (config.clock ?? 'song') === 'song'
+    const bootedAt = performance.now()
+
     let audioEl: HTMLAudioElement | null = null
-    function getSongTime(): number {
-      if (!audioEl) audioEl = document.getElementById('mp-audio') as HTMLAudioElement | null
-      return audioEl?.currentTime ?? 0
+    function wallTime(): number {
+      return (performance.now() - bootedAt) / 1000
+    }
+    function getClockTime(): number {
+      if (!useSongClock) return wallTime()
+      if (!audioEl) {
+        audioEl = document.getElementById('mp-audio') as HTMLAudioElement | null
+      }
+      if (!audioEl) return wallTime()
+      return audioEl.currentTime
     }
 
     const shapeNameAt = (i: number): ShapeName => shapes[i % shapes.length]
@@ -92,7 +122,7 @@ export default function ParticleViewer({ config, style, className }: Props) {
     let waveTime = 0
     const WAVE_SPEED = 0.002
 
-    const initial = resolveMorphState(getSongTime())
+    const initial = resolveMorphState(getClockTime())
     let curIdx = initial.baseIdx
     let cur = sampleShape(shapeNameAt(curIdx), n)
     let nxt = sampleShape(shapeNameAt(curIdx + 1), n)
@@ -251,7 +281,7 @@ export default function ParticleViewer({ config, style, className }: Props) {
       const rawFRy = orbitT * TAU + dragRy
       const rawFRx = Math.sin(orbitT * TAU) * 0.52 + dragRx
 
-      const { baseIdx, morphT: rawMorphT } = resolveMorphState(getSongTime())
+      const { baseIdx, morphT: rawMorphT } = resolveMorphState(getClockTime())
 
       const curIsWave = shapeNameAt(baseIdx) === 'wave'
       const nxtIsWave = shapeNameAt(baseIdx + 1) === 'wave'
@@ -284,6 +314,15 @@ export default function ParticleViewer({ config, style, className }: Props) {
         curIdx = baseIdx
       }
 
+      // The 'wave' shape is deliberately uncached because it animates, so each
+      // of these calls rebuilds n point arrays and copies them into fresh
+      // Float32Arrays. At n=3500 that is roughly 200k allocations a second and
+      // the GC pauses are visible.
+      //
+      // It is left in place so 'wave' keeps working inside a morph sequence,
+      // but for a page whose whole background IS a wave, use WaveField
+      // instead: it allocates once and writes numbers into the same buffers
+      // every frame. That is what the status pages render.
       if (curIsWave) cur = sampleShape('wave', n, waveTime, waveStretch)
       if (nxtIsWave) nxt = sampleShape('wave', n, waveTime, waveStretch)
 
@@ -408,7 +447,7 @@ export default function ParticleViewer({ config, style, className }: Props) {
   }, [config, isDark])
 
   return (
-    <div style={{ background: isDark ? '#000000' : '#FAFAFA', width: '100%', height: '100%' }}>
+    <div style={{ background: 'transparent', width: '100%', height: '100%' }}>
       <canvas ref={canvasRef} className={className}
         style={{ display: 'block', width: '100%', height: '100%', touchAction: 'none', ...style }}
       />

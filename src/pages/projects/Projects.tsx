@@ -3,7 +3,7 @@
  *
  * All copy comes from site.config.ts projectsPage. Nothing is hardcoded here.
  * (Exception: the CLASSIFIED card's redaction stamps are thematic set-dressing,
- * not copy — they are intentionally literal.)
+ * not copy, they are intentionally literal.)
  *
  * ─── SITE CONFIG FIELDS READ BY THIS PAGE ─────────────────────────────────────
  *
@@ -45,7 +45,7 @@
  *                               clicked. Defaults to /memes/<slug>.gif. If the
  *                               file is missing the modal shows a themed
  *                               "clearance denied" fallback instead of a broken
- *                               image — safe to ship before the gif exists.
+ *                               image, so it is safe to ship before the gif exists.
  *
  *  Inactive projects: plain <div> rows, nothing clickable, all links disabled.
  *  Internal/Internal Testing: store/download buttons hidden even on active cards.
@@ -62,6 +62,188 @@ import type { ProjectStatus, ProjectVisibility } from '@/config'
 import { useIsMobile } from '@/hooks'
 
 type Project = (typeof projects)[number]
+
+// ── Cover image ───────────────────────────────────────────────────────────────
+/**
+ * The card thumbnail is a fixed 16:9 box, which is right for the grid: every
+ * card is the same height and the rows line up. The problem was that every
+ * image was drawn with objectFit: 'cover'.
+ *
+ * 'cover' crops to fill. For a landscape screenshot that is exactly what you
+ * want. For a PORTRAIT phone screenshot, a 9:16 image in a 16:9 box means you
+ * see a narrow horizontal slice out of the middle and lose the top and bottom
+ * of the screen, which is usually the whole interface. That is what "the
+ * images do not properly fit the box" was.
+ *
+ * So the fit is decided per image, from the file itself:
+ *
+ *   ratio >= 1.15   landscape, use 'cover'. It fills the box with no letterbox
+ *                   and the crop is harmless.
+ *   ratio <  1.15   portrait or square, use 'contain' so the whole screenshot
+ *                   is visible, and fill the leftover space with a blurred,
+ *                   scaled copy of the same image.
+ *
+ * The blurred backdrop is the technique the app stores use. It reads as
+ * deliberate art direction rather than as an image that failed to fit, and it
+ * keeps the card's colour coming from the project instead of from a grey box.
+ *
+ * Set `coverFit` on a project to override the measurement:
+ *   coverFit: 'cover'    always crop to fill
+ *   coverFit: 'contain'  always show the whole image on the backdrop
+ */
+type CoverFit = 'cover' | 'contain'
+
+function CoverImage({
+  src,
+  alt,
+  fallbackTint,
+  forced,
+}: {
+  src: string
+  alt: string
+  /** Shown when neither the project cover nor the default cover loads. */
+  fallbackTint: string
+  forced?: CoverFit
+}) {
+  // undefined until the browser reports the real dimensions.
+  const [fit, setFit] = useState<CoverFit | undefined>(forced)
+  const [failed, setFailed] = useState(false)
+
+  if (failed) {
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: `linear-gradient(135deg, ${fallbackTint} 0%, #090909 100%)`,
+        }}
+      />
+    )
+  }
+
+  const showBackdrop = fit === 'contain'
+
+  return (
+    <>
+      {/* Blurred fill behind a contained image. aria-hidden: it is the same
+          picture as the one on top, so a screen reader should not see it. */}
+      {showBackdrop && (
+        <img
+          src={src}
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            // Scaled up so the blur's soft edge never shows a seam at the box
+            // border, which it does at scale 1.
+            transform: 'scale(1.15)',
+            filter: 'blur(18px) saturate(1.1)',
+            opacity: 0.45,
+            display: 'block',
+          }}
+        />
+      )}
+
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        onLoad={e => {
+          if (forced) return
+          const img = e.currentTarget
+          if (!img.naturalWidth || !img.naturalHeight) return
+          setFit(img.naturalWidth / img.naturalHeight >= 1.15 ? 'cover' : 'contain')
+        }}
+        onError={() => setFailed(true)}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          // Default to 'cover' while measuring: the common case is landscape,
+          // so this avoids a visible snap on most cards.
+          objectFit: fit ?? 'cover',
+          display: 'block',
+          // Portrait art gets a little breathing room from the box edge.
+          padding: showBackdrop ? '6%' : 0,
+          boxSizing: 'border-box',
+        }}
+      />
+    </>
+  )
+}
+
+/**
+ * App icon with a letter fallback.
+ *
+ * The old version answered a load error by calling document.createElement and
+ * insertBefore on React-managed DOM. React does not know that node exists, so
+ * it survives re-renders it should not and can be inserted twice if onError
+ * fires again. This keeps the fallback in state, where React owns it.
+ */
+function AppIcon({
+  src,
+  letter,
+  size = 34,
+  grayscale = false,
+}: {
+  src?: string
+  letter: string
+  size?: number
+  grayscale?: boolean
+}) {
+  const [failed, setFailed] = useState(false)
+  const radius = Math.round(size * 0.24)
+
+  if (!src || failed) {
+    return (
+      <div
+        aria-hidden="true"
+        style={{
+          width: size,
+          height: size,
+          flexShrink: 0,
+          borderRadius: radius,
+          background: '#111',
+          border: '1px solid var(--border-strong, #1a1a1a)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: Math.round(size * 0.4),
+          fontWeight: 700,
+          color: 'var(--text-ghost, #3a3a3a)',
+        }}
+      >
+        {letter}
+      </div>
+    )
+  }
+
+  return (
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+      style={{
+        width: size,
+        height: size,
+        flexShrink: 0,
+        borderRadius: radius,
+        border: '1px solid var(--border-strong, #1a1a1a)',
+        objectFit: 'cover',
+        display: 'block',
+        ...(grayscale ? { filter: 'grayscale(1) opacity(0.35)' } : null),
+      }}
+    />
+  )
+}
 
 // ── Status grouping ───────────────────────────────────────────────────────────
 const INACTIVE_STATUSES = new Set([
@@ -133,7 +315,7 @@ function Redacted({ w, h = 10 }: { w: string; h?: number }) {
 
 // ── Classified project card ───────────────────────────────────────────────────
 // Shows the NAME and nothing else. Everything a normal card shows is redacted.
-// Not a <Link> — clicking opens the meme modal instead of a detail page.
+// Not a <Link>. Clicking opens the meme modal instead of a detail page.
 function ClassifiedCard({
   p,
   isMobile,
@@ -172,7 +354,7 @@ function ClassifiedCard({
         el.style.boxShadow = 'none'
       }}
     >
-      {/* Redacted "thumbnail" — same 16:9 slot as normal cards */}
+      {/* Redacted "thumbnail", same 16:9 slot as normal cards */}
       <div style={{
         position: 'relative',
         width: '100%',
@@ -211,7 +393,7 @@ function ClassifiedCard({
         </div>
       </div>
 
-      {/* Body — only the name survives redaction */}
+      {/* Body, only the name survives redaction */}
       <div style={{
         flex: 1,
         display: 'flex',
@@ -232,7 +414,7 @@ function ClassifiedCard({
           {p.name}
         </h2>
 
-        {/* Redacted tagline — matches the 2-line slot of normal cards */}
+        {/* Redacted tagline, matches the 2-line slot of normal cards */}
         <div style={{ minHeight: '37px', display: 'flex', flexDirection: 'column', gap: '6px', justifyContent: 'center' }}>
           <Redacted w="92%" />
           <Redacted w="61%" />
@@ -284,7 +466,7 @@ function ClassifiedCard({
 // ── Meme modal ────────────────────────────────────────────────────────────────
 // Clicking a classified card opens this. Shows p.memeGif (default
 // /memes/<slug>.gif). If the gif is missing/unloadable, a themed fallback
-// renders instead of a broken image — nothing to add before the gif exists.
+// renders instead of a broken image, so there is nothing to add before the gif exists.
 function MemeModal({ p, onClose }: { p: Project; onClose: () => void }) {
   const [imgFailed, setImgFailed] = useState(false)
 
@@ -351,11 +533,11 @@ function MemeModal({ p, onClose }: { p: Project; onClose: () => void }) {
           </button>
         </div>
 
-        {/* Meme — or the clearance-denied fallback if the gif is missing */}
+        {/* Meme, or the clearance-denied fallback if the gif is missing */}
         {!imgFailed ? (
           <img
             src={memeGifSrc(p)}
-            alt={`${p.name} — classified`}
+            alt={`${p.name}, classified`}
             onError={() => setImgFailed(true)}
             style={{
               display: 'block', width: '100%',
@@ -452,25 +634,11 @@ function ProjectCard({
           flexShrink: 0,
           background: '#0f0f0f',
         }}>
-          <img
-            src={p.coverImage ?? (assets as any).defaultCover}
+          <CoverImage
+            src={p.coverImage ?? (assets as { defaultCover?: string }).defaultCover ?? ''}
             alt={p.name}
-            style={{
-              position: 'absolute', inset: 0,
-              width: '100%', height: '100%',
-              objectFit: 'cover', display: 'block',
-            }}
-            onError={e => {
-              // If default cover also fails, fall back to the colour band
-              const img = e.currentTarget
-              img.style.display = 'none'
-              const parent = img.parentElement
-              if (parent) {
-                const fallback = document.createElement('div')
-                fallback.style.cssText = `position:absolute;inset:0;background:linear-gradient(135deg,${statusColors.bg ?? 'rgba(255,255,255,0.03)'} 0%,#090909 100%)`
-                parent.appendChild(fallback)
-              }
-            }}
+            fallbackTint={statusColors.bg ?? 'rgba(255,255,255,0.03)'}
+            forced={(p as { coverFit?: CoverFit }).coverFit}
           />
 
           <div style={{
@@ -490,17 +658,14 @@ function ProjectCard({
             <span style={statusStyle(p.status as ProjectStatus)}>{p.status}</span>
           </div>
 
-          <img
-            src={p.appIconPath ?? (assets as any).defaultIcon}
-            alt=""
-            style={{
-              position: 'absolute', bottom: '10px', left: '12px',
-              width: '36px', height: '36px', borderRadius: '9px',
-              border: '1px solid rgba(255,255,255,0.08)',
-              background: '#0a0a0a', objectFit: 'cover',
-            }}
-            onError={e => { e.currentTarget.style.display = 'none' }}
-          />
+          {/* App icon, anchored over the gradient so it reads on any artwork */}
+          <div style={{ position: 'absolute', bottom: '10px', left: '12px' }}>
+            <AppIcon
+              src={p.appIconPath ?? (assets as { defaultIcon?: string }).defaultIcon}
+              letter={p.name[0] ?? '?'}
+              size={36}
+            />
+          </div>
         </div>
 
         {/* Body */}
@@ -635,22 +800,11 @@ function InactiveRow({ p }: { p: Project }) {
             </svg>
           </div>
         ) : (
-          <img
-            src={p.appIconPath ?? (assets as any).defaultIcon}
-            alt=""
-            style={{
-              width: '34px', height: '34px', borderRadius: '8px',
-              border: '1px solid var(--border-strong, #1a1a1a)', flexShrink: 0,
-              filter: 'grayscale(1) opacity(0.35)', objectFit: 'cover',
-            }}
-            onError={e => {
-              const img = e.currentTarget
-              img.style.display = 'none'
-              const span = document.createElement('div')
-              span.style.cssText = 'width:34px;height:34px;border-radius:8px;background:#111;border:1px solid #1a1a1a;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#222'
-              span.textContent = p.name[0]
-              img.parentElement?.insertBefore(span, img)
-            }}
+          <AppIcon
+            src={p.appIconPath ?? (assets as { defaultIcon?: string }).defaultIcon}
+            letter={p.name[0] ?? '?'}
+            size={34}
+            grayscale
           />
         )}
 
@@ -705,7 +859,7 @@ export default function Projects() {
   const isMobile = useIsMobile(640)
   const [memeProject, setMemeProject] = useState<Project | null>(null)
 
-  // Classified projects bypass the active/inactive grouping entirely —
+  // Classified projects bypass the active/inactive grouping entirely:
   // their status is nobody's business.
   const classified = projects.filter(isClassified)
   const active = projects.filter(p => !isClassified(p) && !isInactive(p.status))
@@ -756,7 +910,7 @@ export default function Projects() {
           ))}
         </div>
 
-        {/* Active — classified cards render in the same grid, at the end */}
+        {/* Active. Classified cards render in the same grid, at the end */}
         {(active.length > 0 || classified.length > 0) && (
           <section style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             <SectionHeading count={active.length + classified.length}>
@@ -800,7 +954,7 @@ export default function Projects() {
 
       </div>
 
-      {/* Meme modal — classified card clicked */}
+      {/* Meme modal, shown when a classified card is clicked */}
       {memeProject && (
         <MemeModal p={memeProject} onClose={() => setMemeProject(null)} />
       )}
