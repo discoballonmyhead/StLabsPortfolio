@@ -1,41 +1,59 @@
 /**
- * Voiceorb.tsx - v3
+ * Voiceorb.tsx - v4
  * src/components/Voiceorb.tsx
  *
- * Voice reactive particle orb in a small popup. Same engine as v2, but every
- * control moved off the UI and onto the keyboard.
+ * Voice reactive particle orb in a small popup. Same rendering engine as v3;
+ * the keyboard layer underneath it has been rebuilt.
  *
- * WHAT CHANGED FROM v2
- *   - The shape dropdown is gone. Shapes step with Q and E, auto cycle toggles
- *     with C, and everything else has a key too. See orb.config.ts.
- *   - An info button sits next to the title. It opens a panel holding the full
- *     key list and the colour swatches, both read live from site.config.ts.
- *   - Colour is no longer hardcoded per variant. Swatches come from
- *     ORB_SWATCHES in site.config.ts and can be cycled with X and W or clicked in the panel.
- *     The variant now only decides how the orb MOVES, via ORB_MOTION.
- *   - Popup width adapts to the viewport, so it behaves on a phone.
+ * ─── WHAT CHANGED FROM v3 ────────────────────────────────────────────────────
  *
- * KEYS ONLY REACH THE ACTIVE ORB
- *   With two orbs open, keys go to whichever one the pointer is over, falling
- *   back to the last one clicked. Keys are ignored entirely while the title
- *   field has focus, so renaming an orb to "zebra" will not spin it.
+ * The control surface is the same idea, with six specific bugs out of it. The
+ * full account of each is in orbControls.ts; in short:
  *
- * NO MIC?
- *   The orb idles with ambient breathing and the footer says so. Everything
- *   except voice reactivity still works.
+ *   - One orb open now simply has the keyboard. Before, keys did nothing until
+ *     the pointer had been over the orb at least once.
+ *   - Closing the focused orb hands the keyboard to the one underneath instead
+ *     of leaving no orb listening.
+ *   - An older orb can no longer steal focus back from a newer one when one of
+ *     its callbacks happens to change identity.
+ *   - Holding a stepping key walks shapes at a readable rate instead of
+ *     strobing through all of them in a quarter of a second.
+ *   - Shake is a real binding in site.config.ts rather than a hardcoded `case`
+ *     plus an `as any` push into the help panel.
+ *   - Two actions bound to the same key is now reported in development rather
+ *     than silently disabling one of them.
+ *
+ * And three things that were missing:
+ *
+ *   - Leaving auto cycle lands on the shape currently on screen, so the orb
+ *     does not jump when you take manual control.
+ *   - Spin has a speed, adjustable with the bracket keys.
+ *   - A random shape key, which is the fastest way to find the one you want out
+ *     of twenty-seven.
+ *
+ * ─── SHAPES ──────────────────────────────────────────────────────────────────
+ *
+ * Auto cycle walks ORB_SHAPE_CYCLE, which is ordered so consecutive shapes are
+ * never two variations on the same thing. Q and E step through every shape in
+ * SHAPE_NAMES except the wave, which is a flat band built for the status page
+ * background and makes no sense in a sphere.
+ *
+ * ─── NO MIC? ─────────────────────────────────────────────────────────────────
+ *
+ * The orb idles with ambient breathing and the footer says so. Everything
+ * except voice reactivity still works.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { sampleShape, SHAPE_NAMES } from '@/particles/shapes'
+import { sampleShape, SHAPE_NAMES, SHAPE_LABELS, ORB_SHAPE_CYCLE } from '@/particles/shapes'
 import type { ShapeName } from '@/particles/shapes'
+
 import {
-    ORB_SWATCHES,
-    ORB_DEFAULT_SWATCH,
-    ORB_MOTION,
-    ORB_KEYS,
-    ORB_KEY_LIST,
-} from '@/config'
-import type { OrbSwatch } from '@/config'
+    useOrbKeys, visibleBindings, nextOrbId, pushOrb, ORB_GROUP_LABELS,
+} from './orb/orbControls'
+import type { OrbHandlers, OrbBinding } from './orb/orbControls'
+import { ORB_DEFAULT_SWATCH, ORB_MOTION, ORB_SWATCHES, OrbSwatch } from '@/config'
+import { ORB_KEYS } from '@/config/site.config.orb'
 
 type Variant = 'blue' | 'orange'
 type ShapeMode = 'auto' | ShapeName
@@ -49,16 +67,6 @@ interface Props {
     title?: string
 }
 
-// ── Which orb the keyboard is talking to ──────────────────────────────────────
-// Module scope on purpose: it is shared across every mounted orb.
-let ACTIVE_ORB: number | null = null
-let ORB_SEQ = 0
-
-// Shapes the auto cycle walks through. The keys can reach all of SHAPE_NAMES.
-const ORB_SHAPES: ShapeName[] = [
-    'icosphere', 'superEllipsoid', 'roseCurve', 'trefoil', 'torusKnot', 'lissajous',
-]
-
 const TAU = Math.PI * 2
 const N = 720   // particles, kept light for a small canvas
 const BASE = 300   // design width in css px
@@ -66,11 +74,23 @@ const DEPTH_B = 10    // depth buckets, one fillStyle each
 const HOLD = 3.4   // morph clock units held per shape in auto mode
 const MORPH = 1.15  // morph clock units per transition
 
+/** Spin speed steps the bracket keys walk through. 1 is the original rate. */
+const SPIN_STEPS = [0.25, 0.5, 1, 1.75, 3] as const
+
 // Noise gate. Raise if the orb still twitches at room noise, lower if you have
 // to shout. GATE_ABS is absolute, GATE_RATIO is relative to the tracked floor.
 const GATE_ABS = 0.09
 const GATE_RATIO = 3.0
 const GATE_CLOSE = 0.7
+
+/**
+ * Shapes the manual keys walk through.
+ *
+ * Everything except the wave, which is a flat horizontal band sized for a
+ * full-bleed background. In a 300px circle it is a line, and having it in the
+ * cycle means two keypresses out of every lap look like the orb broke.
+ */
+const STEP_SHAPES: ShapeName[] = SHAPE_NAMES.filter(s => s !== 'wave')
 
 function hexToRgb(hex: string): [number, number, number] {
     const c = hex.replace('#', '').padEnd(6, '0')
@@ -87,9 +107,15 @@ function wander(t: number, seed: number): number {
         + Math.sin(t * 4.31 + seed * 0.47) * 0.2
 }
 
-/** 'torusKnot' becomes 'Torus Knot' for display. */
-function prettyShape(name: string): string {
-    return name.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).trim()
+/**
+ * Display name for a shape.
+ *
+ * Reads SHAPE_LABELS rather than de-camel-casing the identifier, because the
+ * generic version produced "Dna Helix" and "Stateless Logo", and a few of the
+ * new shapes need a proper name rather than a mangled one.
+ */
+function shapeLabel(name: ShapeName): string {
+    return SHAPE_LABELS[name] ?? name
 }
 
 function swatchById(id: string): OrbSwatch {
@@ -105,7 +131,7 @@ function computeSize(): number {
 export default function VoiceOrb({
     variant, onClose, offsetRight = 24, initialShape = 'auto', title: titleProp,
 }: Props) {
-    const orbId = useMemo(() => ++ORB_SEQ, [])
+    const orbId = useMemo(() => nextOrbId(), [])
 
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const rootRef = useRef<HTMLDivElement>(null)
@@ -127,19 +153,37 @@ export default function VoiceOrb({
     const [shapeMode, setShapeMode] = useState<ShapeMode>(initialShape)
     const [swatchId, setSwatchId] = useState<string>(defaultSwatchId)
     const [spin, setSpin] = useState(true)
+    const [spinStep, setSpinStep] = useState(2)      // index into SPIN_STEPS, 1x
     const [micOn, setMicOn] = useState(true)
-    const [shake, setShake] = useState(false) // Default to not shaking
+    const [shake, setShake] = useState(false)
 
     const shapeModeRef = useRef<ShapeMode>(initialShape)
     const swatchRef = useRef<OrbSwatch>(swatchById(defaultSwatchId))
     const swatchDirty = useRef(false)
     const spinRef = useRef(true)
+    // Typed as number rather than left to infer. SPIN_STEPS is `as const`, so
+    // SPIN_STEPS[2] has the literal type 1 and the ref would refuse every other
+    // step in the list.
+    const spinSpeedRef = useRef<number>(SPIN_STEPS[2])
     const micOnRef = useRef(true)
     const shakeRef = useRef(false)
     const sizeRef = useRef(size)
 
+    /**
+     * The shape actually on screen right now, written by the render loop.
+     *
+     * This is what makes leaving auto cycle feel right: the keyboard needs to
+     * know what you are looking at, not what the state machine started on. The
+     * old version jumped to SHAPE_NAMES[0] whichever shape was up, which read
+     * as the orb losing its place.
+     */
+    const visibleShapeRef = useRef<ShapeName>(
+        initialShape === 'auto' ? ORB_SHAPE_CYCLE[0] : initialShape,
+    )
+
     useEffect(() => { shapeModeRef.current = shapeMode }, [shapeMode])
     useEffect(() => { spinRef.current = spin }, [spin])
+    useEffect(() => { spinSpeedRef.current = SPIN_STEPS[spinStep] }, [spinStep])
     useEffect(() => { micOnRef.current = micOn }, [micOn])
     useEffect(() => { shakeRef.current = shake }, [shake])
     useEffect(() => { sizeRef.current = size }, [size])
@@ -222,7 +266,7 @@ export default function VoiceOrb({
         // Morph state machine. beginMorphTo bakes the current on screen blend into
         // a scratch buffer first, so retargeting mid transition never pops.
         const startMode = shapeModeRef.current
-        const startShape: ShapeName = startMode === 'auto' ? ORB_SHAPES[0] : startMode
+        const startShape: ShapeName = startMode === 'auto' ? ORB_SHAPE_CYCLE[0] : startMode
         let autoIdx = 0
         let phase: 'hold' | 'morph' = 'hold'
         let phaseT = 0
@@ -232,6 +276,8 @@ export default function VoiceOrb({
         let cRgb = hexToRgb(colorFor(startShape, 0, startMode === 'auto'))
         let nRgb = cRgb
         const bake = new Float32Array(N * 3)
+
+        visibleShapeRef.current = startShape
 
         const beginMorphTo = (name: ShapeName, color: string) => {
             const st0 = phase === 'morph' ? smoothstep(clamp(phaseT / MORPH, 0, 1)) : 0
@@ -246,6 +292,7 @@ export default function VoiceOrb({
             Bpos = sampleShape(name, N).positions
             nRgb = hexToRgb(color)
             targetName = name
+            visibleShapeRef.current = name
             phase = 'morph'
             phaseT = 0
         }
@@ -325,7 +372,7 @@ export default function VoiceOrb({
                     phaseT += dt * clockSpeed
                     if (phaseT >= HOLD) {
                         autoIdx++
-                        const next = ORB_SHAPES[autoIdx % ORB_SHAPES.length]
+                        const next = ORB_SHAPE_CYCLE[autoIdx % ORB_SHAPE_CYCLE.length]
                         beginMorphTo(next, colorFor(next, autoIdx, true))
                     }
                 }
@@ -357,31 +404,33 @@ export default function VoiceOrb({
             ctx.fillStyle = '#070707'
             ctx.fillRect(0, 0, S, S)
 
-            // ── Wander and Shake ─────────────────────────────────────────────────
+            // ── Wander and shake ─────────────────────────────────────────────────
             const wT = tS * MOTION.noiseSpeed
             const drive = 0.35 + lvl
 
-            // Only drift the entire shape randomly if shake is enabled
+            // Only drift the whole shape around if shake is on.
             const shakeMult = shakeRef.current ? 1 : 0
             const ox = wander(wT, seed) * 9 * MOTION.noiseAmp * drive * shakeMult
             const oy = wander(wT * 0.83, seed * 1.9) * 7 * MOTION.noiseAmp * drive * shakeMult
 
             if (spinRef.current) {
-                orbit += dt * (0.10 + lvl * 0.55 + wander(wT * 0.5, seed * 3.1) * 0.05 * MOTION.noiseAmp)
+                orbit += dt
+                    * (0.10 + lvl * 0.55 + wander(wT * 0.5, seed * 3.1) * 0.05 * MOTION.noiseAmp)
+                    * spinSpeedRef.current
             }
 
             const cx = S / 2 + ox
             const cy = S / 2 + oy
             const scale = S * 0.30 * (1 + wander(wT * 1.4, seed * 0.7) * MOTION.breathe + lvl * 0.22)
 
-            // Limit violent shape-level rotation noise based on shake toggle
+            // Shape-level rotation noise is gated by shake too.
             const rx = Math.sin(orbit * 0.9) * 0.5 + wander(wT * 0.6, seed * 4.3) * 0.12 * MOTION.noiseAmp * shakeMult
 
             const cosY = Math.cos(orbit), sinY = Math.sin(orbit)
             const cosX = Math.cos(rx), sinX = Math.sin(rx)
             const FOV = 3.0
 
-            // Individual particles ALWAYS jitter, completely independent of the shape shake toggle
+            // Individual particles always jitter, independent of the shake toggle.
             const jr = MOTION.jitter * (0.25 + lvl * 1.6)
             const jw = tS * (3 + MOTION.noiseSpeed * 2)
 
@@ -481,17 +530,41 @@ export default function VoiceOrb({
     }, [])
 
     // ── Shape and colour stepping ───────────────────────────────────────────────
+
+    /**
+     * Step through STEP_SHAPES.
+     *
+     * Leaving auto continues from the shape on screen rather than jumping to the
+     * start of the list. A shape not in STEP_SHAPES, which only happens if the
+     * orb was opened with initialShape: 'wave', falls back to index 0 rather
+     * than wrapping off the end of the array.
+     */
     const stepShape = useCallback((dir: 1 | -1) => {
         setShapeMode(prev => {
-            const list = SHAPE_NAMES as readonly ShapeName[]
-            if (prev === 'auto') {
-                // Leaving auto: land on the first or last shape depending on direction.
-                return dir === 1 ? list[0] : list[list.length - 1]
-            }
-            const i = list.indexOf(prev)
-            const n = (i + dir + list.length) % list.length
-            return list[n]
+            const from = prev === 'auto' ? visibleShapeRef.current : prev
+            const i = STEP_SHAPES.indexOf(from)
+            const base = i < 0 ? 0 : i
+            return STEP_SHAPES[(base + dir + STEP_SHAPES.length) % STEP_SHAPES.length]
         })
+    }, [])
+
+    /**
+     * Jump somewhere else in the list.
+     *
+     * Excludes whatever is already showing, so pressing the key always visibly
+     * does something. A random pick that can land on the current shape feels
+     * broken roughly one time in twenty-seven, which is often enough to notice.
+     */
+    const randomShape = useCallback(() => {
+        setShapeMode(prev => {
+            const current = prev === 'auto' ? visibleShapeRef.current : prev
+            const pool = STEP_SHAPES.filter(s => s !== current)
+            return pool[Math.floor(Math.random() * pool.length)] ?? STEP_SHAPES[0]
+        })
+    }, [])
+
+    const toggleAuto = useCallback(() => {
+        setShapeMode(prev => (prev === 'auto' ? visibleShapeRef.current : 'auto'))
     }, [])
 
     const stepSwatch = useCallback((dir: 1 | -1) => {
@@ -506,69 +579,61 @@ export default function VoiceOrb({
         setShapeMode('auto')
         setSwatchId(defaultSwatchId)
         setSpin(true)
+        setSpinStep(2)
         setMicOn(true)
         setShake(false)
     }, [defaultSwatchId])
 
     // ── Keyboard ────────────────────────────────────────────────────────────────
-    useEffect(() => {
-        // Newest orb takes focus on mount so keys work without moving the mouse.
-        ACTIVE_ORB = orbId
+    //
+    // One handler per action, keyed by the same names as ORB_KEYS. An action in
+    // the config with no handler here is simply not bound, and does not appear
+    // in the help panel, so the two can never disagree about what works.
+    const handlers: OrbHandlers = useMemo(() => ({
+        nextShape: () => stepShape(1),
+        prevShape: () => stepShape(-1),
+        randomShape,
+        toggleAuto,
+        toggleSpin: () => setSpin(s => !s),
+        spinFaster: () => setSpinStep(s => Math.min(SPIN_STEPS.length - 1, s + 1)),
+        spinSlower: () => setSpinStep(s => Math.max(0, s - 1)),
+        nextColor: () => stepSwatch(1),
+        prevColor: () => stepSwatch(-1),
+        toggleShake: () => setShake(s => !s),
+        toggleMic: () => setMicOn(m => !m),
+        toggleRec: () => { if (recRef.current) stopRecording(); else startRecording() },
+        reset: resetAll,
+        toggleInfo: () => setInfoOpen(o => !o),
+        close: onClose,
+    }), [
+        stepShape, randomShape, toggleAuto, stepSwatch, resetAll,
+        startRecording, stopRecording, onClose,
+    ])
 
-        const onKey = (e: KeyboardEvent) => {
-            if (ACTIVE_ORB !== orbId) return
-            if (e.metaKey || e.ctrlKey || e.altKey) return
+    useOrbKeys({ orbId, bindings: ORB_KEYS, handlers })
 
-            // Never steal keys from a text field.
-            const t = e.target as HTMLElement | null
-            if (t) {
-                const tag = t.tagName
-                if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable) return
-            }
-
-            const k = e.key.toLowerCase()
-            let handled = true
-
-            switch (k) {
-                case ORB_KEYS.nextShape.key: stepShape(1); break
-                case ORB_KEYS.prevShape.key: stepShape(-1); break
-                case ORB_KEYS.toggleAuto.key: setShapeMode(p => (p === 'auto' ? (SHAPE_NAMES[0] as ShapeName) : 'auto')); break
-                case ORB_KEYS.toggleSpin.key: setSpin(s => !s); break
-                case ORB_KEYS.nextColor.key: stepSwatch(1); break
-                case ORB_KEYS.prevColor.key: stepSwatch(-1); break
-                case ORB_KEYS.toggleMic.key: setMicOn(m => !m); break
-                case 'j': setShake(s => !s); break // Fallback key 'j' injected for Shake Toggle
-                case ORB_KEYS.toggleRec.key:
-                    if (recRef.current) stopRecording(); else startRecording()
-                    break
-                case ORB_KEYS.reset.key: resetAll(); break
-                case ORB_KEYS.toggleInfo.key: setInfoOpen(o => !o); break
-                case ORB_KEYS.close.key: onClose(); break
-                default: handled = false
-            }
-
-            if (handled) e.preventDefault()
-        }
-
-        window.addEventListener('keydown', onKey)
-        return () => {
-            window.removeEventListener('keydown', onKey)
-            if (ACTIVE_ORB === orbId) ACTIVE_ORB = null
-        }
-    }, [orbId, stepShape, stepSwatch, resetAll, startRecording, stopRecording, onClose])
-
-    const claimFocus = useCallback(() => { ACTIVE_ORB = orbId }, [orbId])
+    /** Pointing at an orb gives it the keyboard, which matters with two open. */
+    const claimFocus = useCallback(() => { pushOrb(orbId) }, [orbId])
 
     const mm = String(Math.floor(recSecs / 60)).padStart(2, '0')
     const ss = String(recSecs % 60).padStart(2, '0')
 
-    const modeLabel = shapeMode === 'auto' ? 'Auto' : prettyShape(shapeMode)
+    const modeLabel = shapeMode === 'auto'
+        ? `Auto ${shapeLabel(visibleShapeRef.current)}`
+        : shapeLabel(shapeMode)
 
-    // Inject custom key for shake into display keys safely if not in external config yet
-    const displayKeys = [...ORB_KEY_LIST]
-    if (!displayKeys.some(k => k.key === 'j')) {
-        displayKeys.push({ key: 'j', label: 'Toggle shake', display: 'J' } as any)
-    }
+    // Help panel content, grouped, derived from what is actually wired up.
+    const keyGroups = useMemo(() => {
+        const rows = visibleBindings(ORB_KEYS, handlers)
+        const order: OrbBinding['group'][] = ['shape', 'look', 'audio', 'window']
+        return order
+            .map(group => ({
+                group,
+                label: ORB_GROUP_LABELS[group],
+                rows: rows.filter(r => r.binding.group === group),
+            }))
+            .filter(g => g.rows.length > 0)
+    }, [handlers])
 
     return (
         <div
@@ -581,16 +646,15 @@ export default function VoiceOrb({
                 right: `${offsetRight}px`,
                 zIndex: 300,
                 width: `${size}px`,
-                maxWidth: 'calc(100vw - 32px)',
-                background: 'rgba(8,8,8,0.97)',
-                backdropFilter: 'blur(16px)',
-                border: '1px solid #1e1e1e',
+                background: '#0a0a0a',
+                border: '1px solid #1c1c1c',
                 borderRadius: '14px',
-                boxShadow: `0 12px 48px rgba(0,0,0,0.7), 0 0 24px rgba(${swatch.glow},0.10)`,
                 overflow: 'hidden',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                boxShadow: `0 12px 48px rgba(0,0,0,0.7), 0 0 24px rgba(${swatch.glow},0.10)`,
             }}
         >
-            {/* Header: dot, editable title, info, close */}
+            {/* Header: status dot, editable title, info and close */}
             <div
                 style={{
                     display: 'flex',
@@ -695,7 +759,7 @@ export default function VoiceOrb({
                 </button>
             </div>
 
-            {/* Info panel: keys and swatches, both from orb.config.ts */}
+            {/* Info panel: swatches and keys, both from site.config.ts */}
             {infoOpen && (
                 <div style={{ borderBottom: '1px solid #161616', background: 'rgba(255,255,255,0.015)' }}>
                     <div style={{ padding: '12px 12px 10px' }}>
@@ -741,47 +805,55 @@ export default function VoiceOrb({
                     </div>
 
                     <div style={{ padding: '2px 12px 12px' }}>
-                        <p
-                            style={{
-                                fontSize: '9px',
-                                fontWeight: 600,
-                                letterSpacing: '0.14em',
-                                textTransform: 'uppercase',
-                                color: '#4a4a4a',
-                                margin: '0 0 8px',
-                            }}
-                        >
-                            Keys
-                        </p>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            {displayKeys.map(b => (
-                                <div
-                                    key={b.key}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}
+                        {keyGroups.map(group => (
+                            <div key={group.group} style={{ marginBottom: '10px' }}>
+                                <p
+                                    style={{
+                                        fontSize: '9px',
+                                        fontWeight: 600,
+                                        letterSpacing: '0.14em',
+                                        textTransform: 'uppercase',
+                                        color: '#4a4a4a',
+                                        margin: '0 0 7px',
+                                    }}
                                 >
-                                    <span style={{ fontSize: '10.5px', color: '#6a6a6a', lineHeight: 1.5 }}>{b.label}</span>
-                                    <kbd
-                                        style={{
-                                            flexShrink: 0,
-                                            minWidth: '18px',
-                                            textAlign: 'center',
-                                            fontFamily: 'var(--font-mono, monospace)',
-                                            fontSize: '9.5px',
-                                            color: '#9a9a9a',
-                                            background: '#141414',
-                                            border: '1px solid #262626',
-                                            borderRadius: '3px',
-                                            padding: '2px 5px',
-                                            letterSpacing: '0.04em',
-                                        }}
-                                    >
-                                        {b.display}
-                                    </kbd>
+                                    {group.label}
+                                </p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    {group.rows.map(({ action, binding }) => (
+                                        <div
+                                            key={action}
+                                            style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}
+                                        >
+                                            <span style={{ fontSize: '10.5px', color: '#6a6a6a', lineHeight: 1.5 }}>
+                                                {binding.label}
+                                            </span>
+                                            <kbd
+                                                style={{
+                                                    flexShrink: 0,
+                                                    minWidth: '18px',
+                                                    textAlign: 'center',
+                                                    fontFamily: 'var(--font-mono, monospace)',
+                                                    fontSize: '9.5px',
+                                                    color: '#9a9a9a',
+                                                    background: '#141414',
+                                                    border: '1px solid #262626',
+                                                    borderRadius: '3px',
+                                                    padding: '2px 5px',
+                                                    letterSpacing: '0.04em',
+                                                }}
+                                            >
+                                                {binding.display}
+                                            </kbd>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                        <p style={{ fontSize: '9.5px', color: '#3a3a3a', margin: '10px 0 0', lineHeight: 1.6 }}>
-                            Keys go to the orb your pointer is over. They are ignored while the title is being edited.
+                            </div>
+                        ))}
+                        <p style={{ fontSize: '9.5px', color: '#3a3a3a', margin: '2px 0 0', lineHeight: 1.6 }}>
+                            With one orb open the keys always reach it. With two, they go to
+                            whichever one you last pointed at. They are ignored while the title
+                            is being edited.
                         </p>
                     </div>
                 </div>
@@ -821,7 +893,9 @@ export default function VoiceOrb({
                 >
                     <span style={{ color: shapeMode === 'auto' ? swatch.accent : '#7a7a7a' }}>{modeLabel}</span>
                     <span style={{ color: '#242424' }}>/</span>
-                    <span style={{ color: spin ? '#7a7a7a' : '#3a3a3a' }}>{spin ? 'Spin' : 'Still'}</span>
+                    <span style={{ color: spin ? '#7a7a7a' : '#3a3a3a' }}>
+                        {spin ? (spinStep === 2 ? 'Spin' : `Spin ${SPIN_STEPS[spinStep]}x`) : 'Still'}
+                    </span>
                     <span style={{ color: '#242424' }}>/</span>
                     <span style={{ color: shake ? '#7a7a7a' : '#3a3a3a' }}>{shake ? 'Shake' : 'Smooth'}</span>
                     <span style={{ color: '#242424' }}>/</span>

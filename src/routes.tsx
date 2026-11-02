@@ -17,9 +17,10 @@ const StatusPage = lazy(() => import('@/features/status-pages/StatusPage'))
 const TermsPage = lazy(() => import('@/features/legal/TermsPage'))
 const CookiePage = lazy(() => import('@/features/legal/CookiePage'))
 const AccountDeletion = lazy(() => import('@/features/delete-account/AccountDeletionPage'))
+const AuthCallback = lazy(() => import('@/features/status-pages/AuthCallback'))
 
 // NOTE: these are relative paths (no leading "/") because they're nested
-// children of the root layout route below — React Router's nested-route
+// children of the root layout route below. React Router's nested-route
 // resolution handles that regardless of how the routes get rendered, so
 // `projects/${slug}` here still serves at the real /projects/<slug> URL.
 function buildProjectRoutes(): RouteObject[] {
@@ -41,6 +42,19 @@ function buildProjectRoutes(): RouteObject[] {
         { path: `${base}/auth/failed`, element: <StatusPage type="auth-failed" projectSlug={p.slug} /> },
       )
     }
+
+    // The one address Supabase redirects to. It reads the outcome out of the
+    // URL and renders the right status page, because Supabase sends success and
+    // failure to the same place and only the parameters differ.
+    //
+    // This route was in the old App.tsx route table and missing from this one,
+    // which is what happens when two route tables live in the same repo. There
+    // is one table now.
+    if (p.hasAuthPages || p.hasEmailConfirmation || p.hasPasswordReset) {
+      routes.push(
+        { path: `${base}/auth/callback`, element: <AuthCallback slug={p.slug} /> },
+      )
+    }
     if (p.hasPasswordReset) {
       routes.push(
         { path: `${base}/reset/sent`, element: <StatusPage type="reset-sent" projectSlug={p.slug} /> },
@@ -60,7 +74,7 @@ function buildProjectRoutes(): RouteObject[] {
 }
 
 // Single root layout route. App (below) renders the persistent chrome
-// (MusicPlayer) once and an <Outlet/> for whichever page matched — this is
+// (MusicPlayer) once and an <Outlet/> for whichever page matched. This is
 // what lets scripts/prerender.mjs both (a) prerender every page below as
 // real static HTML at build time, and (b) keep MusicPlayer mounted across
 // client-side navigation, exactly like the old sibling-of-<Routes/> trick.

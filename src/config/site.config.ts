@@ -33,7 +33,9 @@
  * there is no runtime dependency on the particle system and no import cycle.
  */
 
-import type { ShapeName } from '@/particles/shapes'
+import { ShapeName } from "../particles"
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ASSETS   all paths relative to /public

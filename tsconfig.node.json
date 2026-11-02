@@ -4,9 +4,10 @@
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    // Add this line to enable JSX parsing for React 17+
+    "jsx": "react-jsx"
   },
   "include": [
-    "vite.config.ts"
+    "src"
   ]
 }

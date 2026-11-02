@@ -3,10 +3,42 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--
+      These are defaults, and on a built site almost none of them survive:
+      scripts/prerender.mjs replaces the title and injects the real per-page
+      meta, canonical, Open Graph and JSON-LD into every generated file.
+
+      They matter in two places. In `vite dev`, where the prerender has not
+      run, this is what the head looks like before Seo.tsx takes over on mount.
+      And as a safety net, so a route that somehow escapes prerendering still
+      has a title and a description rather than neither.
+
+      Keep them generic. A per-page value here would be wrong on every page but
+      one.
+    -->
+  <title>Stateless Labs</title>
+  <meta name="description"
+    content="A studio for the ideas that refuse to leave you alone. Bring the rough version, leave with something real." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="color-scheme" content="dark light" />
+
   <link rel="icon" type="image/svg+xml" href="/logos/stlabs-mark.svg" />
   <link rel="shortcut icon" href="/logos/stlabs-mark.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stateless Labs</title>
+  <link rel="apple-touch-icon" href="/logos/stlabs-mark.svg" />
+
+  <!--
+      Preconnect, not just the stylesheet link. The font CSS lives on
+      fonts.googleapis.com and the font files themselves on fonts.gstatic.com,
+      which is a second origin and a second TLS handshake the browser does not
+      discover until it has parsed the CSS. Warming both up front is worth
+      roughly a hundred milliseconds on a cold connection.
+
+      crossorigin on the gstatic line is required, not decorative: font files
+      are fetched in CORS mode, and a preconnect without it opens a connection
+      the font request cannot reuse.
+    -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
