@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Opening Clasher ST…</title>
+<style>
+  :root { --bg:#0e1116; --card:#171b22; --ink:#f2f4f8; --muted:#9aa3b2; --accent:#5b8cff; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#f4f6fa; --card:#ffffff; --ink:#151922; --muted:#5d6676; --accent:#2f63e8; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; padding:16px;
+         background:var(--bg); color:var(--ink);
+         font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  .card { width:100%; max-width:420px; background:var(--card); border-radius:18px;
+          padding:28px 22px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,.18); }
+  h1 { font-size:20px; margin:0 0 6px; }
+  p  { margin:0 0 20px; color:var(--muted); }
+  a.btn { display:block; padding:13px 16px; border-radius:12px; margin-top:10px;
+          text-decoration:none; font-weight:700; }
+  a.primary { background:var(--accent); color:#fff; }
+  a.secondary { border:1px solid var(--muted); color:var(--ink); }
+  a.link { color:var(--muted); font-weight:600; }
+  .spinner { width:28px; height:28px; margin:0 auto 16px; border-radius:50%;
+             border:3px solid var(--muted); border-top-color:var(--accent);
+             animation:spin .8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="spinner" id="spinner"></div>
+  <h1>Opening Clasher ST…</h1>
+  <p id="msg">Taking you there.</p>
+  <a class="btn primary hidden" id="open-app" href="#">Open in the app</a>
+  <a class="btn secondary hidden" id="open-web" href="#">Continue in the browser</a>
+  <a class="btn link hidden" id="get-app" href="#">Get the app</a>
+</main>
+<script>
+(function () {
+  // ── Settings: fill these in once ──────────────────────────────────────
+  var CONFIG = {
+    scheme: 'clasherst',                 // AppConstants.appScheme
+    webApp: 'index.html',                // the web app, next to this page
+    androidPackage: 'YOUR.ANDROID.PACKAGE',   // applicationId in android/app/build.gradle
+    playStore: '',                       // e.g. https://play.google.com/store/apps/details?id=...
+    appStore: ''                         // e.g. https://apps.apple.com/app/id...
+  };
+  // ──────────────────────────────────────────────────────────────────────
+
+  // The screen to open, from "#/tournaments/<id>". Only in-app paths:
+  // nothing here can send people to another site.
+  var route = '/';
+  try { route = decodeURIComponent((location.hash || '').replace(/^#/, '')); } catch (e) {}
+  if (!/^\/[A-Za-z0-9_\-\/%.@]*$/.test(route) || route.indexOf('//') === 0) route = '/';
+
+  var webUrl = new URL(CONFIG.webApp, location.href).href.split('#')[0] + '#' + route;
+  var appUrl = CONFIG.scheme + '://open' + route;
+
+  var ua = navigator.userAgent || '';
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+  var $ = function (id) { return document.getElementById(id); };
+  function show(id, href) { var a = $(id); a.href = href; a.classList.remove('hidden'); }
+  function choices(message) {
+    $('spinner').classList.add('hidden');
+    $('msg').textContent = message;
+    show('open-web', webUrl);
+    if (isAndroid || isIOS) show('open-app', isAndroid ? intentUrl() : appUrl);
+    var store = isAndroid ? CONFIG.playStore : (isIOS ? CONFIG.appStore : '');
+    if (store) show('get-app', store);
+  }
+  function intentUrl() {
+    // Opens the app when it's installed; Chrome goes to the web app otherwise.
+    return 'intent://open' + route + '#Intent;scheme=' + CONFIG.scheme +
+      (CONFIG.androidPackage.indexOf('YOUR.') === 0 ? '' : ';package=' + CONFIG.androidPackage) +
+      ';S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';end';
+  }
+
+  if (isAndroid) {
+    // Normally the installed app takes this link before the page loads
+    // (App Links). Getting here means it didn't (not installed, or opened
+    // inside another app's browser): try the app, the fallback is the web.
+    location.replace(intentUrl());
+    // Some in-app browsers block intent links: offer the choice.
+    setTimeout(function () {
+      if (!document.hidden) choices('Open it in the app or keep going in the browser.');
+    }, 1600);
+  } else if (isIOS) {
+    // With Universal Links an installed app already opened this link, so
+    // here the app is most likely not installed: go to the web app, but
+    // leave "Open in the app" on screen for a moment in case it is.
+    choices('Opening in the browser…');
+    setTimeout(function () { if (!document.hidden) location.replace(webUrl); }, 1800);
+  } else {
+    // Computers: the web app.
+    location.replace(webUrl);
+  }
+})();
+</script>
+</body>
+</html>
