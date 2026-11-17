@@ -44,7 +44,7 @@
   // ── Settings: fill these in once ──────────────────────────────────────
   var CONFIG = {
     scheme: 'clasherst',                 // AppConstants.appScheme
-    webApp: 'index.html',                // the web app, next to this page
+    webApp: './',                        // the web app's folder (not index.html)
     androidPackage: 'YOUR.ANDROID.PACKAGE',   // applicationId in android/app/build.gradle
     playStore: '',                       // e.g. https://play.google.com/store/apps/details?id=...
     appStore: ''                         // e.g. https://apps.apple.com/app/id...
@@ -57,7 +57,11 @@
   try { route = decodeURIComponent((location.hash || '').replace(/^#/, '')); } catch (e) {}
   if (!/^\/[A-Za-z0-9_\-\/%.@]*$/.test(route) || route.indexOf('//') === 0) route = '/';
 
-  var webUrl = new URL(CONFIG.webApp, location.href).href.split('#')[0] + '#' + route;
+  // The web app gets the screen twice, so it opens whichever URL strategy
+  // the build uses: "?link=" for the path strategy (the router's guard turns
+  // it into the screen) and "#" for the hash strategy.
+  var webUrl = new URL(CONFIG.webApp, location.href).href.split('#')[0].split('?')[0] +
+    (route === '/' ? '' : '?link=' + encodeURIComponent(route) + '#' + route);
   var appUrl = CONFIG.scheme + '://open' + route;
 
   var ua = navigator.userAgent || '';
