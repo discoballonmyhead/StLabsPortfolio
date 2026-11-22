@@ -1,0 +1,12 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["TEAMID.your.ios.bundle.id"],
+        "components": [
+          { "/": "/builds/clasher-st/open.html", "comment": "Share links" }
+        ]
+      }
+    ]
+  }
+}
